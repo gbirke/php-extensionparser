@@ -43,7 +43,7 @@ class Extensionparser {
     if(preg_match('/^\\[([a-z0-9A-Z_\-]+)\]\s*(.*)$/', $line, $matches)) {
       $this->notify(new Parserevent('context', array('name' => $matches[1])));
       if(!empty($matches[2])) {
-        $this->_parseComment($matches[2]);
+        $this->_parseComment($matches[2], "context");
       }
     }
     // Match Extensions
@@ -52,7 +52,7 @@ class Extensionparser {
     }
     // Match single-line-comments
     elseif ($line[0] == ';') {
-      $this->notify(new Parserevent('comment', array('text' => substr($line, 1), 'newline' => true)));
+      $this->notify(new Parserevent('comment', array('text' => substr($line, 1), 'context' => "line")));
     }
 
     // TODO: Match #include and other directives
@@ -76,6 +76,7 @@ class Extensionparser {
     list($priority, $rest) = explode(',', $line, 2);
     $priority = trim($priority);
     if(preg_match('/^([0-9]+|n(?:\+[0-9]+)?|s|hint)$/', $priority)) {
+      // TODO: Parse labels
       $this->notify(new Parserevent('priority', array('value' => $priority)));
       if($priority == 'hint') {
         $this->_parseHintChannel($rest);
@@ -93,7 +94,7 @@ class Extensionparser {
     if(preg_match('@([A-Za-z0-9]+/[^; ]+)\s*(.*)$@', trim($channel), $matches)) {
       $this->notify(new Parserevent('hintchannel', array('channel' => $matches[1])));
       if(!empty($matches[2])) {
-        $this->_parseComment($matches[2]);
+        $this->_parseComment($matches[2], "hint");
       }
     }
     else {
@@ -105,17 +106,17 @@ class Extensionparser {
     if(preg_match('/^([A-Za-z0-9]+)\((.+)/', trim($line), $matches )) {
       $this->notify(new Parserevent('application', array('name' => $matches[1])));
       $rest = $this->_parseParams($matches[2]);
-      $this->_parseComment($rest);
+      $this->_parseComment($rest, "extension");
     }
     else {
       throw new ParserSyntaxErrorException("Invalid Application: $line", $this->_line);
     }
   }
 
-  protected function _parseComment($line) {
+  protected function _parseComment($line, $context = "line") {
     $comment = trim($line);
     if(strlen($comment) > 0 && $comment[0] == ';') {
-      $this->notify(new Parserevent('comment', array('text' => substr($comment, 1))));
+      $this->notify(new Parserevent('comment', array('text' => substr($comment, 1), "context" => $context)));
     }
   }
 

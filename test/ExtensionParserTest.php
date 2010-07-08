@@ -34,7 +34,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
 
    public function testSingleLineComment() {
     $this->_parseString("; Just a reminder", array('comment'));
-     $expected = new Parserevent('comment', array('text' => ' Just a reminder', 'newline' => true));
+     $expected = new Parserevent('comment', array('text' => ' Just a reminder', 'type' => "line"));
      $this->assertEvent($expected);
    }
 
@@ -45,9 +45,10 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    }
 
    public function testCommentAfterContext() {
-     $this->_parseString("[test];first comment\n", array('comment'));
+     $this->_parseString("[test];first comment\n", array('context', 'comment'));
      $expected = array(
-       new Parserevent('comment', array('text' => 'first comment'))
+       new Parserevent('context', array('name' => 'test')),
+       new Parserevent('comment', array('text' => 'first comment', "type" => "context"))
      );
      $this->assertEvents($expected);
    }
@@ -183,7 +184,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,1,NoOp();Comments FTW!\n", array('application', 'comment'));
      $expected = array(
          new Parserevent('application', array('name' => 'NoOp')),
-         new Parserevent('comment', array('text' => 'Comments FTW!'))
+         new Parserevent('comment', array('text' => 'Comments FTW!', "type" => "extension"))
      );
      $this->assertEvents($expected);
    }
@@ -208,7 +209,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,hint,SIP/1234 ; Wink wink, nudge nudge", array('hintchannel', 'comment'));
      $expected = array(
          new Parserevent('hintchannel', array('channel' => 'SIP/1234')),
-         new Parserevent('comment', array('text' => ' Wink wink, nudge nudge'))
+         new Parserevent('comment', array('text' => ' Wink wink, nudge nudge', "type" => "hint"))
      );
      $this->assertEvents($expected);
    }
