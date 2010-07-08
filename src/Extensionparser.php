@@ -36,15 +36,28 @@ class Extensionparser {
 
   protected function _parseLine($line) {
     $this->notify(new Parserevent('newline', array('text' => $line, 'number' => $this->_line)));
-    if(preg_match('/^\\s*\[([a-z0-9A-Z_\-]+)\]\s*(?:;(.*))?/', $line, $matches)) {
+    $line = trim($line);
+    if(!$line)
+      return;
+    // Match Contexts
+    if(preg_match('/^\\[([a-z0-9A-Z_\-]+)\]\s*(.*)$/', $line, $matches)) {
       $this->notify(new Parserevent('context', array('name' => $matches[1])));
       if(!empty($matches[2])) {
-        $this->notify(new Parserevent('comment', array('text' => $matches[2])));
+        $this->_parseComment($matches[2]);
       }
     }
-    elseif (preg_match('/^\s*exten\s*=>\s*(.+)/', $line, $matches)) {
+    // Match Extensions
+    elseif (preg_match('/^exten\s*=>\s*(.+)/', $line, $matches)) {
       $this->_parseExtension($matches[1]);
     }
+    // Match single-line-comments
+    elseif ($line[0] == ';') {
+      $this->notify(new Parserevent('comment', array('text' => substr($line, 1), 'newline' => true)));
+    }
+
+    // TODO: Match #include and other directives
+    // TODO: Throw Exception on unexpected input
+
   }
 
   protected function _parseExtension($line) {
@@ -77,10 +90,10 @@ class Extensionparser {
   }
 
   protected function _parseHintChannel($channel) {
-    if(preg_match('@([A-Za-z0-9]+/[^; ]+)(?:;(.*))?$@', trim($channel), $matches)) {
+    if(preg_match('@([A-Za-z0-9]+/[^; ]+)\s*(.*)$@', trim($channel), $matches)) {
       $this->notify(new Parserevent('hintchannel', array('channel' => $matches[1])));
       if(!empty($matches[2])) {
-        $this->notify(new Parserevent('comment', array('text' => $matches[2])));
+        $this->_parseComment($matches[2]);
       }
     }
     else {
@@ -92,9 +105,17 @@ class Extensionparser {
     if(preg_match('/^([A-Za-z0-9]+)\((.+)/', trim($line), $matches )) {
       $this->notify(new Parserevent('application', array('name' => $matches[1])));
       $rest = $this->_parseParams($matches[2]);
+      $this->_parseComment($rest);
     }
     else {
       throw new ParserSyntaxErrorException("Invalid Application: $line", $this->_line);
+    }
+  }
+
+  protected function _parseComment($line) {
+    $comment = trim($line);
+    if(strlen($comment) > 0 && $comment[0] == ';') {
+      $this->notify(new Parserevent('comment', array('text' => substr($comment, 1))));
     }
   }
 
@@ -102,9 +123,8 @@ class Extensionparser {
     $len = strlen($line);
     $pos = 0;
     $openBraces = 0;
-    $openSquareBraces = 0;
-    $openCurlyBraces = 0;
-    $inQuotes = 0;
+    $inQuotes = false;
+    $paramcount = 0;
     while($pos < $len) {
       $c = $line[$pos];
       switch($c) {
@@ -112,12 +132,27 @@ class Extensionparser {
           if($inQuotes)
             break;
           elseif($openBraces == 0) {
-            if($pos > 0)
-              $this->notify(new Parserevent('parameter', array('value' => substr($line, 0, $pos - 1))));
-            return substr($line, $pos);
+            if($pos > 0 || $paramcount > 0) {
+              $this->notify(new Parserevent('parameter', array('value' => substr($line, 0, $pos))));
+            }
+            return substr($line, $pos + 1);
           }
           else {
             $openBraces--;
+          }
+          break;
+        case ",":
+          if(!$inQuotes) {
+            $paramcount++;
+            $this->notify(new Parserevent('parameter', array('value' => substr($line, 0, $pos))));
+            $line = substr($line, $pos + 1);
+            $len = strlen($line);
+            $pos = -1; // Must be -1 so $pos will be 0 after $pos++
+          }
+          break;
+        case "(":
+          if(!$inQuotes) {
+            $openBraces++;
           }
           break;
       }

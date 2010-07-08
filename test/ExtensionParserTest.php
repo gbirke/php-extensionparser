@@ -32,13 +32,19 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->assertEquals(2, count($this->_notifications));
    }
 
-   public function testContextNotification() {
+   public function testSingleLineComment() {
+    $this->_parseString("; Just a reminder", array('comment'));
+     $expected = new Parserevent('comment', array('text' => ' Just a reminder', 'newline' => true));
+     $this->assertEvent($expected);
+   }
+
+   public function testContext() {
      $this->_parseString("[test]", array('context'));
      $expected = new Parserevent('context', array('name' => 'test'));
      $this->assertEvent($expected);
    }
 
-   public function testComments() {
+   public function testCommentAfterContext() {
      $this->_parseString("[test];first comment\n", array('comment'));
      $expected = array(
        new Parserevent('comment', array('text' => 'first comment'))
@@ -130,6 +136,58 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      }
    }
 
+   public function testApplicationWithOneParam() {
+     $this->_parseString("exten => 1,1,Verbose(First Param)", array('application', 'parameter'));
+     $expected = array(
+         new Parserevent('application', array('name' => 'Verbose')),
+         new Parserevent('parameter', array('value' => 'First Param'))
+     );
+     $this->assertEvents($expected);
+   }
+
+   public function testApplicationWithSeveralParams() {
+     $this->_parseString("exten => 1,1,Macro(mymacro,foo,1337)", array('application', 'parameter'));
+     $expected = array(
+         new Parserevent('application', array('name' => 'Macro')),
+         new Parserevent('parameter', array('value' => 'mymacro')),
+         new Parserevent('parameter', array('value' => 'foo')),
+         new Parserevent('parameter', array('value' => '1337'))
+     );
+     $this->assertEvents($expected);
+   }
+
+   public function testApplicationWithEmptyParam() {
+     $this->_parseString("exten => 1,1,Macro(mymacro,,1337)", array('application', 'parameter'));
+     $expected = array(
+         new Parserevent('application', array('name' => 'Macro')),
+         new Parserevent('parameter', array('value' => 'mymacro')),
+         new Parserevent('parameter', array('value' => '')),
+         new Parserevent('parameter', array('value' => '1337'))
+     );
+     $this->assertEvents($expected);
+   }
+
+   public function testApplicationAllParamsEmpty() {
+     $this->_parseString("exten => 1,1,Macro(,)", array('application', 'parameter'));
+     $expected = array(
+         new Parserevent('application', array('name' => 'Macro')),
+         new Parserevent('parameter', array('value' => '')),
+         new Parserevent('parameter', array('value' => ''))
+     );
+     $this->assertEvents($expected);
+   }
+
+   // TODO Test brace handling
+
+   public function testCommentAfterApplication() {
+     $this->_parseString("exten => 1,1,NoOp();Comments FTW!\n", array('application', 'comment'));
+     $expected = array(
+         new Parserevent('application', array('name' => 'NoOp')),
+         new Parserevent('comment', array('text' => 'Comments FTW!'))
+     );
+     $this->assertEvents($expected);
+   }
+
    public function testHintExtension() {
      $this->_parseString("exten => 1,hint,SIP/1234", array('hintchannel'));
      $expected = new Parserevent('hintchannel', array('channel' => 'SIP/1234'));
@@ -144,6 +202,15 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      catch(ParserSyntaxErrorException $e) {
        $this->assertContains("channel", $e->getMessage());
      }
+   }
+
+   public function testCommentAfterHintExtension() {
+     $this->_parseString("exten => 1,hint,SIP/1234 ; Wink wink, nudge nudge", array('hintchannel', 'comment'));
+     $expected = array(
+         new Parserevent('hintchannel', array('channel' => 'SIP/1234')),
+         new Parserevent('comment', array('text' => ' Wink wink, nudge nudge'))
+     );
+     $this->assertEvents($expected);
    }
 
    public function assertEvent($expected) {
