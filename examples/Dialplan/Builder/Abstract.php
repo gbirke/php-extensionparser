@@ -13,8 +13,10 @@ abstract class Dialplan_Builder_Abstract implements IExtensionObserver{
 
   abstract public function getNotificationTypes();
 
+  protected $_objectStack = array();
+
   /**
-   * Dispatch the netofication to a builder action.
+   * Dispatch the notification to a builder action.
    *
    * No error checking at the moment.
    *
@@ -24,6 +26,15 @@ abstract class Dialplan_Builder_Abstract implements IExtensionObserver{
   public function update($emitter, $notification) {
     $method = $notification->type.'Action';
     $this->$method($notification);
+  }
+
+  protected function _addObject($object) {
+    $this->_objectStack[] = $object;
+  }
+
+  public function getObject() {
+    return array_shift($this->_objectStack);
+    ;
   }
 
 }

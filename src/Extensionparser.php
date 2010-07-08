@@ -55,6 +55,7 @@ class Extensionparser {
       $this->notify(new Parserevent('comment', array('text' => substr($line, 1), 'context' => "line")));
     }
 
+    // TODO: match global variables in default/ global context
     // TODO: Match #include and other directives
     // TODO: Throw Exception on unexpected input
 
@@ -166,6 +167,7 @@ class Extensionparser {
    *
    * @param IExtensionObserver $observer
    * @param mixed $eventname A string of array of event names.
+   * @return Extensionparser
    */
   public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
     if(is_string($eventname))
@@ -176,6 +178,7 @@ class Extensionparser {
       }
       $this->_observers[$evt]->attach($observer);
     }
+    return $this;
   }
 
   public function removeObserver(IExtensionObserver $observer, $eventname = 'ALL') {
@@ -192,6 +195,7 @@ class Extensionparser {
         $this->_observers[$evt]->detach($observer);
       }
     }
+    return $this;
   }
 
   public function notify(Parserevent $notification) {

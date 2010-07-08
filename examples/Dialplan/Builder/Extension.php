@@ -1,7 +1,6 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * 
  */
 
 /**
@@ -19,16 +18,15 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
    * @var Dialplan_Extension
    */
   protected $_currentExtensionObj;
+
   /**
    *
-   * @var Dialplan_Extension
+   * @var Dialplan_Builder_Application
    */
-  protected $_prevExtension;
-
   protected $_applicationBuilder;
 
   public function getNotificationTypes() {
-    return array('extension', 'priority', 'label');
+    return array('extension', 'priority', 'label', 'endfile', 'newline');
   }
 
   public function commentAction(Parserevent $notification) {
@@ -37,14 +35,13 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
 
   public function extensionAction(Parserevent $notification) {
     if($notification->value != $this->_currentExtension) {
-      $this->_prevExtension = $this->_currentExtensionObj;
-      $this->_prevExtension->addApplication($this->_applicationBuilder->getLastApplication(),
-              $this->_currentPriority, $this->_currentLabel);
+      $this->_currentExtension = $notification->value;
       $this->_currentExtensionObj = new Dialplan_Extension();
       $this->_currentExtensionObj->setExten($notification->value);
     }
-    $this->_currentLabel = null;
-    $this->_currentPriority = '';
+    else {
+      $this->_addExtension();
+    }
   }
 
   public function priorityAction(Parserevent $notification) {
@@ -53,6 +50,31 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
 
   public function labelAction(Parserevent $notification) {
     $this->_currentLabel = $notification->value;
+  }
+
+  public function endfileAction(Parserevent $notification) {
+    $this->_addExtension();
+  }
+  public function newlineAction(Parserevent $notification) {
+    $this->_addExtension();
+  }
+
+  public function setApplicationBuilder(Dialplan_Builder_Application $builder) {
+    $this->_applicationBuilder = $builder;
+  }
+
+  protected function _addExtension() {
+    if($this->_currentExtensionObj) {
+      $application = $this->_applicationBuilder->getObject();
+      if($application) {
+        $this->_currentExtensionObj->addApplication($application,
+              $this->_currentPriority, $this->_currentLabel);
+      }
+      $this->_addObject($this->_currentExtensionObj);
+      $this->_currentExtensionObj = null;
+      $this->_currentLabel = null;
+      $this->_currentPriority = '';
+    }
   }
 
 }

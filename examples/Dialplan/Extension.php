@@ -27,7 +27,7 @@ class Dialplan_Extension {
    */
   protected $_comment = "";
 
-  protected $_template = "exten => %s,%s%s\n";
+  protected $_template = "exten => %s,%s,%s\n";
 
   /**
    * Get extension number
