@@ -1,0 +1,3 @@
+Extensionparser is a PHP class for parsing Asterisk extension.conf files.
+
+Currently it's a work in progress with no official release or documentation.
