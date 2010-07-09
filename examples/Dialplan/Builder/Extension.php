@@ -35,6 +35,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
 
   public function extensionAction(Parserevent $notification) {
     if($notification->value != $this->_currentExtension) {
+      echo "newext\n";
       $this->_currentExtension = $notification->value;
       $this->_currentExtensionObj = new Dialplan_Extension();
       $this->_currentExtensionObj->setExten($notification->value);
@@ -56,6 +57,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     $this->_addExtension();
   }
   public function newlineAction(Parserevent $notification) {
+    echo "newline\n\n";
     $this->_addExtension();
   }
 
@@ -70,10 +72,16 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
         $this->_currentExtensionObj->addApplication($application,
               $this->_currentPriority, $this->_currentLabel);
       }
+      else {
+        echo "No Application";
+      }
       $this->_addObject($this->_currentExtensionObj);
       $this->_currentExtensionObj = null;
       $this->_currentLabel = null;
       $this->_currentPriority = '';
+    }
+    else {
+      echo "no current obj\n";
     }
   }
 

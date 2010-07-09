@@ -18,11 +18,10 @@ class Dialplan_Builder_Application extends Dialplan_Builder_Abstract {
   protected $_currentApplication;
 
   public function getNotificationTypes() {
-    return array('comment', 'application', 'parameter');
+    return array('comment', 'application', 'parameter', 'newline');
   }
 
   public function applicationAction(Parserevent $notification) {
-    $this->_addObject($this->_currentApplication);
     $this->_currentApplication = new Dialplan_Application();
     $this->_currentApplication->setName($notification->name);
   }
@@ -34,6 +33,10 @@ class Dialplan_Builder_Application extends Dialplan_Builder_Abstract {
   public function commentAction(Parserevent $notification) {
     if($notification->context == 'extension')
       $this->_currentApplication->setComment($notification->text);
+  }
+
+  public function newlineAction(Parserevent $notification) {
+    $this->_addObject($this->_currentApplication);
   }
 
 }

@@ -22,6 +22,11 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->assertEquals($n, $this->_notifications[0]);
    }
 
+   // TODO
+   public function testMultipleObserversForTheSameEvent() {
+    ;
+   }
+
    public function testFileNotification() {
      $this->_parseString(" ", array('startfile', 'endfile'));
      $this->assertEquals(2, count($this->_notifications));

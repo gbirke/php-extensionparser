@@ -173,7 +173,7 @@ class Extensionparser {
     if(is_string($eventname))
       $eventname = array($eventname);
     foreach($eventname as $evt) {
-      if(empty($this->_observers[$evt])) {
+      if(!isset($this->_observers[$evt])) {
         $this->_observers[$evt] = new SplObjectStorage();
       }
       $this->_observers[$evt]->attach($observer);
