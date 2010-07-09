@@ -13,6 +13,9 @@ class Dialplan_Builder_Application extends Dialplan_Builder_Abstract {
     
   /**
    *
+   * This builder creates a new application object whenever it encounters an
+   * "application" event.
+   *
    * @var Dialplan_Application
    */
   protected $_currentApplication;
@@ -35,11 +38,14 @@ class Dialplan_Builder_Application extends Dialplan_Builder_Abstract {
       $this->_currentApplication->setComment($notification->text);
   }
 
-
-  public function getObject() {
+  /**
+   * Put current application object in object queue.
+   */
+  public function flush() {
     $this->_addObject($this->_currentApplication);
-    return parent::getObject();
+    ;
   }
+  
 
 }
 ?>

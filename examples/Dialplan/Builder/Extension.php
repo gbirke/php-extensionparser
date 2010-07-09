@@ -41,7 +41,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
       $this->_addApplication();
     }
     else {
-      $this->_addExtension();
+      $this->_addExtension($notification->value);
     }
     // always reset values for priority and label on new extension
     $this->_currentLabel = null;
@@ -50,7 +50,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
 
   public function priorityAction(Parserevent $notification) {
     if($notification->value == 'hint') {
-      $this->_addExtension();
+      $this->_addExtension($notification->value);
     }
     $this->_currentPriority = $notification->value;
   }
@@ -70,6 +70,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   }
 
   protected function _addApplication() {
+    $this->_applicationBuilder->flush();
     $application = $this->_applicationBuilder->getObject();
     if($application) {
         $this->_currentExtensionObj->addApplication($application,
@@ -81,13 +82,14 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     }
   }
 
-  public function _addExtension() {
+  public function _addExtension($newExtensionName) {
     if($this->_currentExtensionObj) {
+        $this->_addApplication();
         $this->_addObject($this->_currentExtensionObj);
-      }
-      $this->_currentExtension = $notification->value;
-      $this->_currentExtensionObj = new Dialplan_Extension();
-      $this->_currentExtensionObj->setExten($notification->value);
+    }
+    $this->_currentExtension = $newExtensionName;
+    $this->_currentExtensionObj = new Dialplan_Extension();
+    $this->_currentExtensionObj->setExten($newExtensionName);
   }
 
 }

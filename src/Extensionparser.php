@@ -184,14 +184,17 @@ class Extensionparser {
    */
   public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
     $this->_eventDispatcher->addObserver($observer, $eventname);
+    return $this;
   }
 
   public function removeObserver(IExtensionObserver $observer, $eventname = 'ALL') {
     $this->_eventDispatcher->removeObserver($observer, $eventname);
+    return $this;
   }
 
   public function notify(Parserevent $notification) {
     $this->_eventDispatcher->notify($notification);
+    return $this;
   }
 
 

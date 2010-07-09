@@ -63,6 +63,16 @@ class Dialplan_Extension {
     return $this;
   }
 
+  /**
+   * Return applications
+   *
+   * @todo Parameter to retrieve them in priority order
+   * @return array
+   */
+  public function getApplications() {
+    return $this->_applications;
+  }
+
   public function getComment() {
     return $this->_comment;
   }

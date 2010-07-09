@@ -1,7 +1,5 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
  */
 
 /**
@@ -9,11 +7,11 @@
  *
  * @author gbirke
  */
-abstract class Dialplan_Builder_Abstract implements IExtensionObserver{
+abstract class Dialplan_Builder_Abstract implements IExtensionObserver, Iterator {
 
   abstract public function getNotificationTypes();
 
-  protected $_objectStack = array();
+  protected $_objectQueue = array();
 
   /**
    * Dispatch the notification to a builder action.
@@ -30,11 +28,35 @@ abstract class Dialplan_Builder_Abstract implements IExtensionObserver{
 
   protected function _addObject($object) {
     if($object)
-      $this->_objectStack[] = $object;
+      $this->_objectQueue[] = $object;
   }
 
   public function getObject() {
-    return array_shift($this->_objectStack);
+    return array_shift($this->_objectQueue);
+  }
+
+  public function getObjectQueue() {
+    return $this->_objectQueue;
+  }
+
+  public function current() {
+    return current($this->_objectQueue);
+  }
+
+  public function key() {
+    return key($this->_objectQueue);
+  }
+
+  public function next() {
+    return next($this->_objectQueue);
+  }
+
+  public function rewind() {
+    return reset($this->_objectQueue);
+  }
+
+  public function valid() {
+    return (bool) $this->current();
   }
 
 }
