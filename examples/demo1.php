@@ -10,6 +10,7 @@ $parser->addObserver($abuilder, $abuilder->getNotificationTypes())
        ->addObserver($ebuilder, $ebuilder->getNotificationTypes());
 $parser->parse('extensions1.conf');
 
+
 while($exten = $ebuilder->getObject()) {
   echo $exten;
 }

@@ -48,7 +48,7 @@ class Parserevent {
   }
 
   public function notificationIsCanceled() {
-    return $this->_continueNotification;
+    return !$this->_continueNotification;
   }
 }
 ?>

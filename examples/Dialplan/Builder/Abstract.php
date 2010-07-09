@@ -34,7 +34,6 @@ abstract class Dialplan_Builder_Abstract implements IExtensionObserver{
 
   public function getObject() {
     return array_shift($this->_objectStack);
-    ;
   }
 
 }

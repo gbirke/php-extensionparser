@@ -18,7 +18,7 @@ class Dialplan_Builder_Application extends Dialplan_Builder_Abstract {
   protected $_currentApplication;
 
   public function getNotificationTypes() {
-    return array('comment', 'application', 'parameter', 'newline');
+    return array('comment', 'application', 'parameter');
   }
 
   public function applicationAction(Parserevent $notification) {
@@ -35,8 +35,10 @@ class Dialplan_Builder_Application extends Dialplan_Builder_Abstract {
       $this->_currentApplication->setComment($notification->text);
   }
 
-  public function newlineAction(Parserevent $notification) {
+
+  public function getObject() {
     $this->_addObject($this->_currentApplication);
+    return parent::getObject();
   }
 
 }
