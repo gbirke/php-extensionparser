@@ -50,5 +50,13 @@ class Parserevent {
   public function notificationIsCanceled() {
     return !$this->_continueNotification;
   }
+
+  /**
+   * Get all properties of this event
+   * @return array
+   */
+  public function getProperties() {
+    return $this->_properties;
+  }
 }
 ?>

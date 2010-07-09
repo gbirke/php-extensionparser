@@ -29,7 +29,8 @@ abstract class Dialplan_Builder_Abstract implements IExtensionObserver{
   }
 
   protected function _addObject($object) {
-    $this->_objectStack[] = $object;
+    if($object)
+      $this->_objectStack[] = $object;
   }
 
   public function getObject() {

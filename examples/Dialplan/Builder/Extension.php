@@ -41,12 +41,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
       $this->_addApplication();
     }
     else {
-      if($this->_currentExtensionObj) {
-        $this->_addObject($this->_currentExtensionObj);
-      }
-      $this->_currentExtension = $notification->value;
-      $this->_currentExtensionObj = new Dialplan_Extension();
-      $this->_currentExtensionObj->setExten($notification->value);
+      $this->_addExtension();
     }
     // always reset values for priority and label on new extension
     $this->_currentLabel = null;
@@ -54,6 +49,9 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   }
 
   public function priorityAction(Parserevent $notification) {
+    if($notification->value == 'hint') {
+      $this->_addExtension();
+    }
     $this->_currentPriority = $notification->value;
   }
 
@@ -81,6 +79,15 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
       throw new Exception("No new Application found in application builder. ".
               "Maybe you called __addApplication too often?");
     }
+  }
+
+  public function _addExtension() {
+    if($this->_currentExtensionObj) {
+        $this->_addObject($this->_currentExtensionObj);
+      }
+      $this->_currentExtension = $notification->value;
+      $this->_currentExtensionObj = new Dialplan_Extension();
+      $this->_currentExtensionObj->setExten($notification->value);
   }
 
 }
