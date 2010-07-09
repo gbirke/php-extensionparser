@@ -19,6 +19,19 @@ class Extensionparser {
   protected $_observers = array();
   protected $_line = 1;
 
+  /**
+   *
+   * @var EventDispatcher
+   */
+  protected $_eventDispatcher;
+
+  public function __construct($eventDispatcher = null) {
+    if($eventDispatcher)
+      $this->_eventDispatcher = $eventDispatcher;
+    else
+      $this->_eventDispatcher = new EventDispatcher();
+  }
+
   function parse($resourceName) {
     $fh = fopen($resourceName, 'r');
     if(!$fh) {
@@ -170,45 +183,15 @@ class Extensionparser {
    * @return Extensionparser
    */
   public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
-    if(is_string($eventname))
-      $eventname = array($eventname);
-    foreach($eventname as $evt) {
-      if(!isset($this->_observers[$evt])) {
-        $this->_observers[$evt] = new SplObjectStorage();
-      }
-      $this->_observers[$evt]->attach($observer);
-    }
-    return $this;
+    $this->_eventDispatcher->addObserver($observer, $eventname);
   }
 
   public function removeObserver(IExtensionObserver $observer, $eventname = 'ALL') {
-    if(is_string($eventname)) {
-      if($eventname == 'ALL') {
-        $eventname = array_keys($this->_observers);
-      }
-      else {
-        $eventname = array($eventname);
-      }
-    }
-    foreach($eventname as $evt) {
-      if(!empty($this->_observers[$evt])) {
-        $this->_observers[$evt]->detach($observer);
-      }
-    }
-    return $this;
+    $this->_eventDispatcher->removeObserver($observer, $eventname);
   }
 
   public function notify(Parserevent $notification) {
-    $eventnames = array('ALL', $notification->type);
-    foreach($eventnames as $evt) {
-      if(!empty($this->_observers[$evt])) {
-        foreach($this->_observers[$evt] as $observer) {
-          $observer->update($this, $notification);
-          if($notification->notificationIsCanceled())
-                  break 2;
-        }
-      }
-    }
+    $this->_eventDispatcher->notify($notification);
   }
 
 
