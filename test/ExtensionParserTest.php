@@ -22,9 +22,19 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->assertEquals($n, $this->_notifications[0]);
    }
 
-   // TODO
+   
    public function testMultipleObserversForTheSameEvent() {
-    ;
+      $recorder1 = new Eventrecorder();
+      $recorder2 = new Eventrecorder();
+      $parser = new Extensionparser();
+      $parser->addObserver($recorder1,array('EVT1', 'EVT2'));
+      $parser->addObserver($recorder2,array('EVT2'));
+      $evt1 = new Parserevent("EVT1");
+      $evt2 = new Parserevent("EVT2");
+      $parser->notify($evt1);
+      $parser->notify($evt2);
+      $this->assertEquals(array($evt1, $evt2), $recorder1->getNotifications());
+      $this->assertEquals(array($evt2), $recorder2->getNotifications());
    }
 
    public function testFileNotification() {
