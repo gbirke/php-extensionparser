@@ -49,7 +49,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
 
    public function testSingleLineComment() {
     $this->_parseString("; Just a reminder", array('comment'));
-     $expected = new Parserevent('comment', array('text' => ' Just a reminder', 'type' => "line"));
+     $expected = new Parserevent('comment', array('text' => ' Just a reminder', 'context' => "line"));
      $this->assertEvent($expected);
    }
 
@@ -63,7 +63,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("[test];first comment\n", array('context', 'comment'));
      $expected = array(
        new Parserevent('context', array('name' => 'test')),
-       new Parserevent('comment', array('text' => 'first comment', "type" => "context"))
+       new Parserevent('comment', array('text' => 'first comment', "context" => "context"))
      );
      $this->assertEvents($expected);
    }
@@ -199,7 +199,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,1,NoOp();Comments FTW!\n", array('application', 'comment'));
      $expected = array(
          new Parserevent('application', array('name' => 'NoOp')),
-         new Parserevent('comment', array('text' => 'Comments FTW!', "type" => "extension"))
+         new Parserevent('comment', array('text' => 'Comments FTW!', "context" => "extension"))
      );
      $this->assertEvents($expected);
    }
@@ -224,7 +224,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,hint,SIP/1234 ; Wink wink, nudge nudge", array('hintchannel', 'comment'));
      $expected = array(
          new Parserevent('hintchannel', array('channel' => 'SIP/1234')),
-         new Parserevent('comment', array('text' => ' Wink wink, nudge nudge', "type" => "hint"))
+         new Parserevent('comment', array('text' => ' Wink wink, nudge nudge', "context" => "hint"))
      );
      $this->assertEvents($expected);
    }
