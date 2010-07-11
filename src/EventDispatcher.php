@@ -8,10 +8,18 @@
  * @author gbirke
  */
 class EventDispatcher {
+
+  /**
+   * A list of observers, sorted by event name
+   *
+   * @var array
+   */
+  protected $_observers = array();
+
   /**
    *
    * @param IExtensionObserver $observer
-   * @param mixed $eventname A string of array of event names.
+   * @param mixed $eventname A string with a single event name or an array of event names.
    * @return Extensionparser
    */
   public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {

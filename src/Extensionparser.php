@@ -1,22 +1,24 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * This file contains the Extensionparser class
  */
 
 /**
- * Description of Extensionparser
+ * Extensionparser is a class that parses an Asterisk extension file.
+ *
+ * Other classes can attach themselves als listeners to the parser. For each
+ * "component" of the extension file (e.g. extension number, priority, application),
+ * the parserc reates a Parserevent object and sends that object to all attached
+ * listeners.
  *
  * @author birke
  */
 class Extensionparser {
   
   /**
-   * A list of observers, sorted by event name
-   * 
-   * @var array 
+   * The current line number
+   * @var integer
    */
-  protected $_observers = array();
   protected $_line = 1;
 
   /**
@@ -25,6 +27,13 @@ class Extensionparser {
    */
   protected $_eventDispatcher;
 
+  /**
+   * Constructs the Parsre object.
+   *
+   * If $eventDispatcher is null, an instance of EventDispatcher will be used.
+   *
+   * @param EventDispatcher $eventDispatcher
+   */
   public function __construct($eventDispatcher = null) {
     if($eventDispatcher)
       $this->_eventDispatcher = $eventDispatcher;
@@ -32,10 +41,17 @@ class Extensionparser {
       $this->_eventDispatcher = new EventDispatcher();
   }
 
+  /**
+   * Read the selected resource line by line and notify all listeners with
+   * Parserevent objects.
+   *
+   * @param string $resourceName A file name or a PHP stream URL
+   * @return Extensionparser
+   */
   function parse($resourceName) {
     $fh = fopen($resourceName, 'r');
     if(!$fh) {
-      throw new Exception("Cound not open $resourceName");
+      throw new ParserException("Cound not open $resourceName");
     }
     $this->notify(new Parserevent('startfile', array('name' => $resourceName)));
     while(!feof($fh)) {
@@ -45,8 +61,13 @@ class Extensionparser {
     }
     fclose($fh);
     $this->notify(new Parserevent('endfile', array('name' => $resourceName)));
+    return $this;
   }
 
+  /**
+   * Parse a single line.
+   * @param string $line
+   */
   protected function _parseLine($line) {
     $this->notify(new Parserevent('newline', array('text' => $line, 'number' => $this->_line)));
     $line = trim($line);
@@ -74,6 +95,11 @@ class Extensionparser {
 
   }
 
+  /**
+   * Check if $line begins with a valid extension number pattern.
+   * Send the rest of the line to _parsePriority
+   * @param string $line
+   */
   protected function _parseExtension($line) {
     list($exten, $rest) = explode(',', $line, 2);
     $exten = trim($exten);
@@ -86,6 +112,12 @@ class Extensionparser {
     }
   }
 
+  /**
+   * Check if $line begins with a valid priority pattern.
+   * If the priority is "hint", send the rest of the line to _parseHintChannel.
+   * Otherwise send it to _parseApplication
+   * @param string $line
+   */
   protected function _parsePriority($line) {
     list($priority, $rest) = explode(',', $line, 2);
     $priority = trim($priority);
@@ -106,6 +138,10 @@ class Extensionparser {
     }
   }
 
+  /**
+   * Check $channel matches a channel pattern.
+   * @param string $channel
+   */
   protected function _parseHintChannel($channel) {
     if(preg_match('@([A-Za-z0-9]+/[^; ]+)\s*(.*)$@', trim($channel), $matches)) {
       $this->notify(new Parserevent('hintchannel', array('channel' => $matches[1])));
@@ -118,6 +154,11 @@ class Extensionparser {
     }
   }
 
+  /**
+   * Check if the beginning of $line matches a valid application pattern.
+   * Send the rest of the line to _parseParams
+   * @param string $line
+   */
   protected function _parseApplication($line) {
     if(preg_match('/^([A-Za-z0-9]+)\((.+)/', trim($line), $matches )) {
       $this->notify(new Parserevent('application', array('name' => $matches[1])));
@@ -129,6 +170,15 @@ class Extensionparser {
     }
   }
 
+  /**
+   * Check if $line begins with a semicolon.
+   *
+   * Several other parse methods use this. They can specify what the context
+   * was for the comment.
+   *
+   * @param string $line
+   * @param string $context
+   */
   protected function _parseComment($line, $context = "line") {
     $comment = trim($line);
     if(strlen($comment) > 0 && $comment[0] == ';') {
@@ -136,6 +186,14 @@ class Extensionparser {
     }
   }
 
+  /**
+   * Parse application params separated by commas.
+   *
+   *
+   * @todo Check for quotes
+   * @param string $line string with params
+   * @return Rest of the line after the closing brace of the param list
+   */
   protected function _parseParams($line) {
     $len = strlen($line);
     $pos = 0;
@@ -179,7 +237,7 @@ class Extensionparser {
   }
 
   /**
-   *
+   * 
    * @param IExtensionObserver $observer
    * @param mixed $eventname A string of array of event names.
    * @return Extensionparser

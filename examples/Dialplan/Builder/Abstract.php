@@ -3,20 +3,36 @@
  */
 
 /**
- * Description of Abstract
+ * The Abstract builder is the base class for builders that receive and process
+ * Parservenet objects from the Extensionparser  to custruct data structures
+ * from the event data.
+ *
+ *
  *
  * @author gbirke
  */
 abstract class Dialplan_Builder_Abstract implements IExtensionObserver, Iterator {
 
+  /**
+   * Return the names of all events the subclass reacts to.
+   *
+   * Note, that for each event you return here, you MUST implement a method
+   * "[eventname]Action".
+   *
+   * @return array
+   */
   abstract public function getNotificationTypes();
 
+  /**
+   * For storing resulting data structures.
+   * @var array
+   */
   protected $_objectQueue = array();
 
   /**
    * Dispatch the notification to a builder action.
    *
-   * No error checking at the moment.
+   * No error checking is done at the moment.
    *
    * @param object $emitter
    * @param Parserevent $notification
