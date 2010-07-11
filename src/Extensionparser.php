@@ -89,9 +89,11 @@ class Extensionparser {
   protected function _parsePriority($line) {
     list($priority, $rest) = explode(',', $line, 2);
     $priority = trim($priority);
-    if(preg_match('/^([0-9]+|n(?:\+[0-9]+)?|s|hint)$/', $priority)) {
-      // TODO: Parse labels
+    if(preg_match('/^(?:[0-9]+|n(?:\+[0-9]+)?|s|hint)(?:\(([a-zA-Z][a-zA-Z0-9\-_.]+)\))?$/', $priority, $matches)) {
       $this->notify(new Parserevent('priority', array('value' => $priority)));
+      if(!empty($matches[1])) {
+        $this->notify(new Parserevent('label', array('value' => $matches[1])));
+      }
       if($priority == 'hint') {
         $this->_parseHintChannel($rest);
       }

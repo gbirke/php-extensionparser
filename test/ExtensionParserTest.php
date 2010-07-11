@@ -136,6 +136,12 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      }
    }
 
+   public function testPriorityWithLabel() {
+     $this->_parseString("exten => 1,n(my-label),NoOp()", array('label'));
+     $expected = new Parserevent('label', array('value' => 'my-label'));
+     $this->assertEvent($expected);;
+   }
+
    public function testSimpleApplication() {
      $this->_parseString("exten => 1,1,NoOp()", array('application', 'parameters'));
      $expected = new Parserevent('application', array('name' => 'NoOp'));
