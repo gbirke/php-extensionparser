@@ -14,8 +14,11 @@ $parser->addObserver($logger)
        ->addObserver($ebuilder, $ebuilder->getNotificationTypes());
 $parser->parse($fn);
 
-
+$collection = array();
 foreach($ebuilder as $exten) {
   echo $exten;
+  $collection[] = $exten->toArray();
 }
+
+echo strlen(json_encode($collection))." Bytes JSON\n";
 ?>

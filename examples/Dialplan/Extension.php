@@ -91,5 +91,22 @@ class Dialplan_Extension {
     }
     return $str;
   }
+
+  public function toArray() {
+    $return = array (
+        'extension' => $this->_exten,
+        'comment' => $this->_comment,
+        'applications' => array()
+    );
+    $labels = array_flip($this->_labels);
+    foreach($this->_applications as $idx => $app) {
+      $return['applications'][] = array(
+          $this->_priorities[$idx],
+          empty($labels[$idx]) ? null : $labels[$idx],
+          $app->toArray()
+          );
+    }
+    return $return;
+  }
 }
 ?>
