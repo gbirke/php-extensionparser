@@ -111,6 +111,20 @@ class Extensionparser implements IEventDispatcher {
     elseif ($line[0] == ';') {
       $this->notify($this, new Parserevent('comment', array('comment' => substr($line, 1), 'context' => "line")));
     }
+    // Match including of other contexts
+    elseif (preg_match('/^include\s*=>\s*([^;]+)(.*)/', $line, $matches)) {
+      $this->notify($this, new Parserevent('include_context', array('include_context' => trim($matches[1]))));
+      if(!empty($matches[2])) {
+        $this->_parseComment($matches[2], "context");
+      }
+    }
+    // Match including of other files
+    elseif (preg_match('/^#include\s*([^;]+)(.*)/', $line, $matches)) {
+      $this->notify($this, new Parserevent('include_file', array('include_file' => trim($matches[1]))));
+      if(!empty($matches[2])) {
+        $this->_parseComment($matches[2], "context");
+      }
+    }
     // Match assignments in [general] and [globals] context
     elseif(preg_match('/^([a-z0-9A-Z\-_]+)\s*=\s*([^;]*)(.*)/', $line, $matches)) {
       if($this->_ctx_type == self::CTX_GENERAL) {
@@ -129,8 +143,6 @@ class Extensionparser implements IEventDispatcher {
     else {
       throw new ParserSyntaxErrorException("Invalid statement: $line", $this->_line);
     }
-
-    // TODO: Match #include and other directives
 
   }
 

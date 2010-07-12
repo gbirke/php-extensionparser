@@ -286,6 +286,23 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->assertEvents($expected);
    }
 
+   public function testContextInclusion() {
+     $this->_parseString("[foo]\ninclude => bar\n", array('context', 'include_context'));
+     $expected = array(
+         new Parserevent('context', array('context' => 'foo')),
+         new Parserevent('include_context', array('include_context' => 'bar'))
+     );
+     $this->assertEvents($expected);
+   }
+
+   public function testFileInclusion() {
+     $this->_parseString("[foo]\n#include foobar.include\n", array('context', 'include_file'));
+     $expected = array(
+         new Parserevent('context', array('context' => 'foo')),
+         new Parserevent('include_file', array('include_file' => 'foobar.include'))
+     );
+     $this->assertEvents($expected);
+   }
 
    public function assertEvent($expected) {
      if(count($this->_notifications) > 0) {
