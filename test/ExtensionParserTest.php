@@ -70,40 +70,40 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
 
    public function testSingleLineComment() {
     $this->_parseString("; Just a reminder", array('comment'));
-     $expected = new Parserevent('comment', array('text' => ' Just a reminder', 'context' => "line"));
+     $expected = new Parserevent('comment', array('comment' => ' Just a reminder', 'context' => "line"));
      $this->assertEvent($expected);
    }
 
    public function testContext() {
      $this->_parseString("[test]", array('context'));
-     $expected = new Parserevent('context', array('name' => 'test'));
+     $expected = new Parserevent('context', array('context' => 'test'));
      $this->assertEvent($expected);
    }
 
    public function testCommentAfterContext() {
      $this->_parseString("[test];first comment\n", array('context', 'comment'));
      $expected = array(
-       new Parserevent('context', array('name' => 'test')),
-       new Parserevent('comment', array('text' => 'first comment', "context" => "context"))
+       new Parserevent('context', array('context' => 'test')),
+       new Parserevent('comment', array('comment' => 'first comment', "context" => "context"))
      );
      $this->assertEvents($expected);
    }
 
    public function testNumericExtension() {
      $this->_parseString("exten => 1,1,NoOp()", array('extension'));
-     $expected = new Parserevent('extension', array('value' => '1'));
+     $expected = new Parserevent('extension', array('extension' => '1'));
      $this->assertEvent($expected);
    }
 
    public function testAlphaNumericExtension() {
      $this->_parseString("exten => s,1,NoOp()", array('extension'));
-     $expected = new Parserevent('extension', array('value' => 's'));
+     $expected = new Parserevent('extension', array('extension' => 's'));
      $this->assertEvent($expected);
    }
 
    public function testWildcardExtension() {
      $this->_parseString("exten => _XXXX,1,NoOp()", array('extension'));
-     $expected = new Parserevent('extension', array('value' => '_XXXX'));
+     $expected = new Parserevent('extension', array('extension' => '_XXXX'));
      $this->assertEvent($expected);
    }
 
@@ -119,31 +119,31 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
 
    public function testNumericPriority() {
      $this->_parseString("exten => 1,1,NoOp()", array('priority'));
-     $expected = new Parserevent('priority', array('value' => '1'));
+     $expected = new Parserevent('priority', array('priority' => '1'));
      $this->assertEvent($expected);
    }
 
    public function testNPriority() {
      $this->_parseString("exten => 1,n,NoOp()", array('priority'));
-     $expected = new Parserevent('priority', array('value' => 'n'));
+     $expected = new Parserevent('priority', array('priority' => 'n'));
      $this->assertEvent($expected);
    }
 
    public function testNPlusPriority() {
      $this->_parseString("exten => 1,n+1,NoOp()", array('priority'));
-     $expected = new Parserevent('priority', array('value' => 'n+1'));
+     $expected = new Parserevent('priority', array('priority' => 'n+1'));
      $this->assertEvent($expected);
    }
 
    public function testSPriority() {
      $this->_parseString("exten => 1,s,NoOp()", array('priority'));
-     $expected = new Parserevent('priority', array('value' => 's'));
+     $expected = new Parserevent('priority', array('priority' => 's'));
      $this->assertEvent($expected);
    }
 
    public function testHintPriority() {
      $this->_parseString("exten => 1,hint,SIP/1234", array('priority'));
-     $expected = new Parserevent('priority', array('value' => 'hint'));
+     $expected = new Parserevent('priority', array('priority' => 'hint'));
      $this->assertEvent($expected);
    }
 
@@ -159,13 +159,13 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
 
    public function testPriorityWithLabel() {
      $this->_parseString("exten => 1,n(my-label),NoOp()", array('label'));
-     $expected = new Parserevent('label', array('value' => 'my-label'));
+     $expected = new Parserevent('label', array('label' => 'my-label'));
      $this->assertEvent($expected);;
    }
 
    public function testSimpleApplication() {
      $this->_parseString("exten => 1,1,NoOp()", array('application', 'parameters'));
-     $expected = new Parserevent('application', array('name' => 'NoOp'));
+     $expected = new Parserevent('application', array('application' => 'NoOp'));
      $this->assertEvent($expected);
    }
 
@@ -182,8 +182,8 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    public function testApplicationWithOneParam() {
      $this->_parseString("exten => 1,1,Verbose(First Param)", array('application', 'parameter'));
      $expected = array(
-         new Parserevent('application', array('name' => 'Verbose')),
-         new Parserevent('parameter', array('value' => 'First Param'))
+         new Parserevent('application', array('application' => 'Verbose')),
+         new Parserevent('parameter', array('parameter' => 'First Param'))
      );
      $this->assertEvents($expected);
    }
@@ -191,10 +191,10 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    public function testApplicationWithSeveralParams() {
      $this->_parseString("exten => 1,1,Macro(mymacro,foo,1337)", array('application', 'parameter'));
      $expected = array(
-         new Parserevent('application', array('name' => 'Macro')),
-         new Parserevent('parameter', array('value' => 'mymacro')),
-         new Parserevent('parameter', array('value' => 'foo')),
-         new Parserevent('parameter', array('value' => '1337'))
+         new Parserevent('application', array('application' => 'Macro')),
+         new Parserevent('parameter', array('parameter' => 'mymacro')),
+         new Parserevent('parameter', array('parameter' => 'foo')),
+         new Parserevent('parameter', array('parameter' => '1337'))
      );
      $this->assertEvents($expected);
    }
@@ -202,10 +202,10 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    public function testApplicationWithEmptyParam() {
      $this->_parseString("exten => 1,1,Macro(mymacro,,1337)", array('application', 'parameter'));
      $expected = array(
-         new Parserevent('application', array('name' => 'Macro')),
-         new Parserevent('parameter', array('value' => 'mymacro')),
-         new Parserevent('parameter', array('value' => '')),
-         new Parserevent('parameter', array('value' => '1337'))
+         new Parserevent('application', array('application' => 'Macro')),
+         new Parserevent('parameter', array('parameter' => 'mymacro')),
+         new Parserevent('parameter', array('parameter' => '')),
+         new Parserevent('parameter', array('parameter' => '1337'))
      );
      $this->assertEvents($expected);
    }
@@ -213,9 +213,9 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    public function testApplicationAllParamsEmpty() {
      $this->_parseString("exten => 1,1,Macro(,)", array('application', 'parameter'));
      $expected = array(
-         new Parserevent('application', array('name' => 'Macro')),
-         new Parserevent('parameter', array('value' => '')),
-         new Parserevent('parameter', array('value' => ''))
+         new Parserevent('application', array('application' => 'Macro')),
+         new Parserevent('parameter', array('parameter' => '')),
+         new Parserevent('parameter', array('parameter' => ''))
      );
      $this->assertEvents($expected);
    }
@@ -225,15 +225,15 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    public function testCommentAfterApplication() {
      $this->_parseString("exten => 1,1,NoOp();Comments FTW!\n", array('application', 'comment'));
      $expected = array(
-         new Parserevent('application', array('name' => 'NoOp')),
-         new Parserevent('comment', array('text' => 'Comments FTW!', "context" => "extension"))
+         new Parserevent('application', array('application' => 'NoOp')),
+         new Parserevent('comment', array('comment' => 'Comments FTW!', "context" => "extension"))
      );
      $this->assertEvents($expected);
    }
 
    public function testHintExtension() {
      $this->_parseString("exten => 1,hint,SIP/1234", array('hintchannel'));
-     $expected = new Parserevent('hintchannel', array('channel' => 'SIP/1234'));
+     $expected = new Parserevent('hintchannel', array('hintchannel' => 'SIP/1234'));
      $this->assertEvent($expected);
    }
 
@@ -250,8 +250,8 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    public function testCommentAfterHintExtension() {
      $this->_parseString("exten => 1,hint,SIP/1234 ; Wink wink, nudge nudge", array('hintchannel', 'comment'));
      $expected = array(
-         new Parserevent('hintchannel', array('channel' => 'SIP/1234')),
-         new Parserevent('comment', array('text' => ' Wink wink, nudge nudge', "context" => "hint"))
+         new Parserevent('hintchannel', array('hintchannel' => 'SIP/1234')),
+         new Parserevent('comment', array('comment' => ' Wink wink, nudge nudge', "context" => "hint"))
      );
      $this->assertEvents($expected);
    }

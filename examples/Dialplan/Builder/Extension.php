@@ -37,11 +37,11 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   public function extensionAction(Parserevent $notification) {
     // if extension is the same as previous, add application
     // else push current extension on stack and create new extension object
-    if($notification->value == $this->_currentExtension) {
+    if($notification->extension == $this->_currentExtension) {
       $this->_addApplication();
     }
     else {
-      $this->_addExtension($notification->value);
+      $this->_addExtension($notification->extension);
     }
     // always reset values for priority and label on new extension
     $this->_currentLabel = null;
@@ -49,14 +49,14 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   }
 
   public function priorityAction(Parserevent $notification) {
-    if($notification->value == 'hint') {
-      $this->_addExtension($notification->value);
+    if($notification->priority == 'hint') {
+      $this->_addExtension($notification->priority);
     }
-    $this->_currentPriority = $notification->value;
+    $this->_currentPriority = $notification->priority;
   }
 
   public function labelAction(Parserevent $notification) {
-    $this->_currentLabel = $notification->value;
+    $this->_currentLabel = $notification->label;
   }
 
   public function endfileAction(Parserevent $notification) {

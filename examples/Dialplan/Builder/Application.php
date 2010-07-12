@@ -26,16 +26,16 @@ class Dialplan_Builder_Application extends Dialplan_Builder_Abstract {
 
   public function applicationAction(Parserevent $notification) {
     $this->_currentApplication = new Dialplan_Application();
-    $this->_currentApplication->setName($notification->name);
+    $this->_currentApplication->setName($notification->application);
   }
 
   public function parameterAction(Parserevent $notification) {
-    $this->_currentApplication->addParam($notification->value);
+    $this->_currentApplication->addParam($notification->parameter);
   }
 
   public function commentAction(Parserevent $notification) {
     if($notification->context == 'extension')
-      $this->_currentApplication->setComment($notification->text);
+      $this->_currentApplication->setComment($notification->comment);
   }
 
   /**
