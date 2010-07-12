@@ -14,7 +14,7 @@ class FixturePlayer extends EventDispatcher {
   public function replay($fixtureClassname) {
     $fixture = new $fixtureClassname;
     foreach($fixture->fixtures as $notification) {
-      $this->notify($notification);
+      $this->notify($this, $notification);
     }
   }
 
