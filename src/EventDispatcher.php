@@ -77,14 +77,15 @@ class EventDispatcher implements IEventDispatcher {
    * The notification is sent to all observers unless an observer calls
    * $notification->cancelNotification()
    *
+   * @param object
    * @param Parserevent $notification
    */
-  public function notify(Parserevent $notification) {
+  public function notify($emitter, Parserevent $notification) {
     $eventnames = array('ALL', $notification->type);
     foreach($eventnames as $evt) {
       if(!empty($this->_observers[$evt])) {
         foreach($this->_observers[$evt] as $observer) {
-          $observer->update($this, $notification);
+          $observer->update($emitter, $notification);
           if($notification->notificationIsCanceled())
                   break 2;
         }

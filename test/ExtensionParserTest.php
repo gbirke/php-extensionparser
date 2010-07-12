@@ -7,17 +7,33 @@ require_once TEST_DIR.'/lib/stringstream.php';
 
 class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensionObserver
 {
+  /**
+   * Storage for Parserevents
+   * @var array
+   */
   protected $_notifications;
+
+  /**
+   * Storage for subjects
+   * @var array;
+   */
+  protected $_subjects;
+
+  /**
+   * @var Extensionparser
+   */
+  protected $_parser;
 
   public function setUp() {
     $this->_notifications = array();
+    $this->_subjects = array();
+    $this->_parser = new Extensionparser();
   }
 
    public function testNotificationWorks() {
-     $parser = new Extensionparser();
-     $parser->addObserver($this);
+     $this->_parser->addObserver($this);
      $n = new Parserevent("Test");
-     $parser->notify($n);
+     $this->_parser->notify($this, $n);
      $this->assertEquals(1, count($this->_notifications));
      $this->assertEquals($n, $this->_notifications[0]);
    }
@@ -26,15 +42,20 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
    public function testMultipleObserversForTheSameEvent() {
       $recorder1 = new Eventrecorder();
       $recorder2 = new Eventrecorder();
-      $parser = new Extensionparser();
-      $parser->addObserver($recorder1,array('EVT1', 'EVT2'));
-      $parser->addObserver($recorder2,array('EVT2'));
+      $this->_parser->addObserver($recorder1,array('EVT1', 'EVT2'));
+      $this->_parser->addObserver($recorder2,array('EVT2'));
       $evt1 = new Parserevent("EVT1");
       $evt2 = new Parserevent("EVT2");
-      $parser->notify($evt1);
-      $parser->notify($evt2);
+      $this->_parser->notify($this, $evt1);
+      $this->_parser->notify($this, $evt2);
       $this->assertEquals(array($evt1, $evt2), $recorder1->getNotifications());
       $this->assertEquals(array($evt2), $recorder2->getNotifications());
+   }
+
+   public function testParserPassesItselfAsEmitter() {
+      $this->_parseString(" ", array('startfile', 'endfile'));
+      $this->assertEquals(2, count($this->_subjects));
+      $this->assertSame($this->_parser, $this->_subjects[0]);
    }
 
    public function testFileNotification() {
@@ -250,13 +271,13 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
 
    public function update($subject, $notification) {
      $this->_notifications[] = $notification;
+     $this->_subjects[] = $subject;
    }
 
    protected function _parseString($str, $observeEvents="ALL") {
      StringStreamController::createRef('test', $str);
-     $parser = new Extensionparser();
-     $parser->addObserver($this, $observeEvents);
-     $parser->parse('string://test');
+     $this->_parser->addObserver($this, $observeEvents);
+     $this->_parser->parse('string://test');
    }
 }
 ?>

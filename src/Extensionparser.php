@@ -28,7 +28,7 @@ class Extensionparser implements IEventDispatcher {
   protected $_eventDispatcher;
 
   /**
-   * Constructs the Parsre object.
+   * Constructs the Parser object.
    *
    * If $eventDispatcher is null, an instance of EventDispatcher will be used.
    *
@@ -53,14 +53,14 @@ class Extensionparser implements IEventDispatcher {
     if(!$fh) {
       throw new ParserException("Cound not open $resourceName");
     }
-    $this->notify(new Parserevent('startfile', array('name' => $resourceName)));
+    $this->notify($this, new Parserevent('startfile', array('name' => $resourceName)));
     while(!feof($fh)) {
       $line = fgets($fh, 2048);
       $this->_parseLine($line);
       $this->_line++;
     }
     fclose($fh);
-    $this->notify(new Parserevent('endfile', array('name' => $resourceName)));
+    $this->notify($this, new Parserevent('endfile', array('name' => $resourceName)));
     return $this;
   }
 
@@ -69,13 +69,13 @@ class Extensionparser implements IEventDispatcher {
    * @param string $line
    */
   protected function _parseLine($line) {
-    $this->notify(new Parserevent('newline', array('text' => $line, 'number' => $this->_line)));
+    $this->notify($this, new Parserevent('newline', array('text' => $line, 'number' => $this->_line)));
     $line = trim($line);
     if(!$line)
       return;
     // Match Contexts
     if(preg_match('/^\\[([a-z0-9A-Z_\-]+)\]\s*(.*)$/', $line, $matches)) {
-      $this->notify(new Parserevent('context', array('name' => $matches[1])));
+      $this->notify($this, new Parserevent('context', array('name' => $matches[1])));
       if(!empty($matches[2])) {
         $this->_parseComment($matches[2], "context");
       }
@@ -86,7 +86,7 @@ class Extensionparser implements IEventDispatcher {
     }
     // Match single-line-comments
     elseif ($line[0] == ';') {
-      $this->notify(new Parserevent('comment', array('text' => substr($line, 1), 'context' => "line")));
+      $this->notify($this, new Parserevent('comment', array('text' => substr($line, 1), 'context' => "line")));
     }
 
     // TODO: match global variables in default/ global context
@@ -104,7 +104,7 @@ class Extensionparser implements IEventDispatcher {
     list($exten, $rest) = explode(',', $line, 2);
     $exten = trim($exten);
     if(preg_match('/^([a-zA-Z0-9#*]+|_[a-zA-Z0-9#*.\\[\\]!]+)$/', $exten)) {
-      $this->notify(new Parserevent('extension', array('value' => $exten)));
+      $this->notify($this, new Parserevent('extension', array('value' => $exten)));
       $this->_parsePriority($rest);
     }
     else {
@@ -122,9 +122,9 @@ class Extensionparser implements IEventDispatcher {
     list($priority, $rest) = explode(',', $line, 2);
     $priority = trim($priority);
     if(preg_match('/^(?:[0-9]+|n(?:\+[0-9]+)?|s|hint)(?:\(([a-zA-Z][a-zA-Z0-9\-_.]+)\))?$/', $priority, $matches)) {
-      $this->notify(new Parserevent('priority', array('value' => $priority)));
+      $this->notify($this, new Parserevent('priority', array('value' => $priority)));
       if(!empty($matches[1])) {
-        $this->notify(new Parserevent('label', array('value' => $matches[1])));
+        $this->notify($this, new Parserevent('label', array('value' => $matches[1])));
       }
       if($priority == 'hint') {
         $this->_parseHintChannel($rest);
@@ -144,7 +144,7 @@ class Extensionparser implements IEventDispatcher {
    */
   protected function _parseHintChannel($channel) {
     if(preg_match('@([A-Za-z0-9]+/[^; ]+)\s*(.*)$@', trim($channel), $matches)) {
-      $this->notify(new Parserevent('hintchannel', array('channel' => $matches[1])));
+      $this->notify($this, new Parserevent('hintchannel', array('channel' => $matches[1])));
       if(!empty($matches[2])) {
         $this->_parseComment($matches[2], "hint");
       }
@@ -161,7 +161,7 @@ class Extensionparser implements IEventDispatcher {
    */
   protected function _parseApplication($line) {
     if(preg_match('/^([A-Za-z0-9]+)\((.+)/', trim($line), $matches )) {
-      $this->notify(new Parserevent('application', array('name' => $matches[1])));
+      $this->notify($this, new Parserevent('application', array('name' => $matches[1])));
       $rest = $this->_parseParams($matches[2]);
       $this->_parseComment($rest, "extension");
     }
@@ -182,7 +182,7 @@ class Extensionparser implements IEventDispatcher {
   protected function _parseComment($line, $context = "line") {
     $comment = trim($line);
     if(strlen($comment) > 0 && $comment[0] == ';') {
-      $this->notify(new Parserevent('comment', array('text' => substr($comment, 1), "context" => $context)));
+      $this->notify($this, new Parserevent('comment', array('text' => substr($comment, 1), "context" => $context)));
     }
   }
 
@@ -208,7 +208,7 @@ class Extensionparser implements IEventDispatcher {
             break;
           elseif($openBraces == 0) {
             if($pos > 0 || $paramcount > 0) {
-              $this->notify(new Parserevent('parameter', array('value' => substr($line, 0, $pos))));
+              $this->notify($this, new Parserevent('parameter', array('value' => substr($line, 0, $pos))));
             }
             return substr($line, $pos + 1);
           }
@@ -219,7 +219,7 @@ class Extensionparser implements IEventDispatcher {
         case ",":
           if(!$inQuotes) {
             $paramcount++;
-            $this->notify(new Parserevent('parameter', array('value' => substr($line, 0, $pos))));
+            $this->notify($this, new Parserevent('parameter', array('value' => substr($line, 0, $pos))));
             $line = substr($line, $pos + 1);
             $len = strlen($line);
             $pos = -1; // Must be -1 so $pos will be 0 after $pos++
@@ -252,8 +252,8 @@ class Extensionparser implements IEventDispatcher {
     return $this;
   }
 
-  public function notify(Parserevent $notification) {
-    $this->_eventDispatcher->notify($notification);
+  public function notify($emitter, Parserevent $notification) {
+    $this->_eventDispatcher->notify($emitter, $notification);
     return $this;
   }
 
