@@ -208,7 +208,7 @@ class Extensionparser implements IEventDispatcher {
             break;
           elseif($openBraces == 0) {
             if($pos > 0 || $paramcount > 0) {
-              $this->notify($this, new Parserevent('parameter', array('parameter' => substr($line, 0, $pos))));
+              $this->notify($this, new Parserevent('parameter', array('parameter' => substr($line, 0, $pos), 'position' => $paramcount + 1)));
             }
             return substr($line, $pos + 1);
           }
@@ -219,7 +219,7 @@ class Extensionparser implements IEventDispatcher {
         case ",":
           if(!$inQuotes) {
             $paramcount++;
-            $this->notify($this, new Parserevent('parameter', array('parameter' => substr($line, 0, $pos))));
+            $this->notify($this, new Parserevent('parameter', array('parameter' => substr($line, 0, $pos), 'position' => $paramcount)));
             $line = substr($line, $pos + 1);
             $len = strlen($line);
             $pos = -1; // Must be -1 so $pos will be 0 after $pos++

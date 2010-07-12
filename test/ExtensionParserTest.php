@@ -183,7 +183,7 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,1,Verbose(First Param)", array('application', 'parameter'));
      $expected = array(
          new Parserevent('application', array('application' => 'Verbose')),
-         new Parserevent('parameter', array('parameter' => 'First Param'))
+         new Parserevent('parameter', array('parameter' => 'First Param', 'position' => 1))
      );
      $this->assertEvents($expected);
    }
@@ -192,9 +192,9 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,1,Macro(mymacro,foo,1337)", array('application', 'parameter'));
      $expected = array(
          new Parserevent('application', array('application' => 'Macro')),
-         new Parserevent('parameter', array('parameter' => 'mymacro')),
-         new Parserevent('parameter', array('parameter' => 'foo')),
-         new Parserevent('parameter', array('parameter' => '1337'))
+         new Parserevent('parameter', array('parameter' => 'mymacro', 'position' => 1)),
+         new Parserevent('parameter', array('parameter' => 'foo', 'position' => 2)),
+         new Parserevent('parameter', array('parameter' => '1337', 'position' => 3))
      );
      $this->assertEvents($expected);
    }
@@ -203,9 +203,9 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,1,Macro(mymacro,,1337)", array('application', 'parameter'));
      $expected = array(
          new Parserevent('application', array('application' => 'Macro')),
-         new Parserevent('parameter', array('parameter' => 'mymacro')),
-         new Parserevent('parameter', array('parameter' => '')),
-         new Parserevent('parameter', array('parameter' => '1337'))
+         new Parserevent('parameter', array('parameter' => 'mymacro', 'position' => 1)),
+         new Parserevent('parameter', array('parameter' => '', 'position' => 2)),
+         new Parserevent('parameter', array('parameter' => '1337', 'position' => 3))
      );
      $this->assertEvents($expected);
    }
@@ -214,8 +214,8 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->_parseString("exten => 1,1,Macro(,)", array('application', 'parameter'));
      $expected = array(
          new Parserevent('application', array('application' => 'Macro')),
-         new Parserevent('parameter', array('parameter' => '')),
-         new Parserevent('parameter', array('parameter' => ''))
+         new Parserevent('parameter', array('parameter' => '', 'position' => 1)),
+         new Parserevent('parameter', array('parameter' => '', 'position' => 2))
      );
      $this->assertEvents($expected);
    }
