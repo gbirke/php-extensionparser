@@ -9,7 +9,7 @@
  *
  * @author gbirke
  */
-class EventDispatcher {
+class EventDispatcher implements IEventDispatcher {
 
   /**
    * A list of observers, sorted by event name

@@ -13,7 +13,7 @@
  *
  * @author birke
  */
-class Extensionparser {
+class Extensionparser implements IEventDispatcher {
   
   /**
    * The current line number
