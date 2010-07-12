@@ -256,6 +256,37 @@ class ExtensionParserTest extends PHPUnit_Framework_TestCase implements IExtensi
      $this->assertEvents($expected);
    }
 
+   public function testGeneralContext() {
+     $this->_parseString("[general]\nstatic=yes\nwriteprotect=no", array('generalsettings', 'context', 'setting'));
+     $expected = array(
+         new Parserevent('generalsettings', array('generalsettings' => 'general')),
+         new Parserevent('setting', array('setting' => 'static', "value" => "yes")),
+         new Parserevent('setting', array('setting' => 'writeprotect', "value" => "no"))
+     );
+     $this->assertEvents($expected);
+   }
+
+   public function testAssignmentsOutsideOfGeneralContextThrowException() {
+     try {
+      $this->_parseString("[foo]\nstatic=yes\nwriteprotect=no", array('generalsettings', 'context', 'setting'));
+      $this->fail("ParserSyntaxErrorException expected.");
+     }
+     catch(ParserSyntaxErrorException $e) {
+       $this->assertContains("Invalid", $e->getMessage());
+     }
+   }
+
+   public function testGlobalVariablesContext() {
+     $this->_parseString("[globals]\nINTERNATIONAL-PREFIX=011\nRINGTIME=15\n", array('globalvariables', 'context', 'global'));
+     $expected = array(
+         new Parserevent('globalvariables', array('globalvariables' => 'globals')),
+         new Parserevent('global', array('global' => 'INTERNATIONAL-PREFIX', "value" => "011")),
+         new Parserevent('global', array('global' => 'RINGTIME', "value" => "15"))
+     );
+     $this->assertEvents($expected);
+   }
+
+
    public function assertEvent($expected) {
      if(count($this->_notifications) > 0) {
       $this->assertEquals($expected, $this->_notifications[0]);

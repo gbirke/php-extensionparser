@@ -28,6 +28,18 @@ class Extensionparser implements IEventDispatcher {
   protected $_eventDispatcher;
 
   /**
+   * Type of current parsed context (The context names "general" and "globals"
+   * are handled differently than other contexts)
+   * 
+   * @var integer
+   */
+  protected $_ctx_type = self::CTX_DEFAULT;
+
+  const CTX_DEFAULT = 1;
+  const CTX_GENERAL = 2;
+  const CTX_GLOBALS = 3;
+
+  /**
    * Constructs the Parser object.
    *
    * If $eventDispatcher is null, an instance of EventDispatcher will be used.
@@ -75,23 +87,50 @@ class Extensionparser implements IEventDispatcher {
       return;
     // Match Contexts
     if(preg_match('/^\\[([a-z0-9A-Z_\-]+)\]\s*(.*)$/', $line, $matches)) {
-      $this->notify($this, new Parserevent('context', array('context' => $matches[1])));
+      if($matches[1] == 'general') {
+        $this->_ctx_type = self::CTX_GENERAL;
+        $this->notify($this, new Parserevent('generalsettings', array('generalsettings' => $matches[1])));
+      }
+      elseif ($matches['1'] == 'globals') {
+        $this->_ctx_type = self::CTX_GLOBALS;
+        $this->notify($this, new Parserevent('globalvariables', array('globalvariables' => $matches[1])));
+      }
+      else {
+        $this->_ctx_type = self::CTX_DEFAULT;
+        $this->notify($this, new Parserevent('context', array('context' => $matches[1])));
+      }
       if(!empty($matches[2])) {
         $this->_parseComment($matches[2], "context");
       }
     }
     // Match Extensions
-    elseif (preg_match('/^exten\s*=>\s*(.+)/', $line, $matches)) {
+    elseif (preg_match('/^exten\s*=>\s*(.+)/', $line, $matches) && $this->_ctx_type = self::CTX_DEFAULT) {
       $this->_parseExtension($matches[1]);
     }
     // Match single-line-comments
     elseif ($line[0] == ';') {
       $this->notify($this, new Parserevent('comment', array('comment' => substr($line, 1), 'context' => "line")));
     }
+    // Match assignments in [general] and [globals] context
+    elseif(preg_match('/^([a-z0-9A-Z\-_]+)\s*=\s*([^;]*)(.*)/', $line, $matches)) {
+      if($this->_ctx_type == self::CTX_GENERAL) {
+        $this->notify($this, new ParserEvent('setting', array('setting' => $matches[1], 'value' => trim($matches[2]))));
+      }
+      elseif ($this->_ctx_type == self::CTX_GLOBALS) {
+        $this->notify($this, new ParserEvent('global', array('global' => $matches[1], 'value' => trim($matches[2]))));
+      }
+      else {
+        throw new ParserSyntaxErrorException("Invalid statement: $line", $this->_line);
+      }
+      if(!empty($matches[3])) {
+        $this->_parseComment($matches[3], "setting");
+      }
+    }
+    else {
+      throw new ParserSyntaxErrorException("Invalid statement: $line", $this->_line);
+    }
 
-    // TODO: match global variables in default/ global context
     // TODO: Match #include and other directives
-    // TODO: Throw Exception on unexpected input
 
   }
 
