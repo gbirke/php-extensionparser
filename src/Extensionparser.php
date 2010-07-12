@@ -8,7 +8,7 @@
  *
  * Other classes can attach themselves als listeners to the parser. For each
  * "component" of the extension file (e.g. extension number, priority, application),
- * the parserc reates a Parserevent object and sends that object to all attached
+ * the parser creates a Parserevent object and sends that object to all attached
  * listeners.
  *
  * @author birke
