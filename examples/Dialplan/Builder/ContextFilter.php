@@ -28,6 +28,12 @@ class Dialplan_Builder_ContextFilter extends Dialplan_Builder_Filter {
     }
   }
 
+  public function getNotificationTypes() {
+    $types = parent::getNotificationTypes();
+    $types[] = 'context';
+    return array_keys(array_flip($types));
+  }
+
   public function getAllowedContexts() {
     return $this->_allowedContexts;
   }

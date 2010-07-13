@@ -15,12 +15,19 @@ class Dialplan_Builder_MacroFilter extends Dialplan_Builder_Filter {
   public function __construct($eventDispatcher = null, $allowedMacros = array()) {
     parent::__construct($eventDispatcher);
     $this->_allowedMacros = $allowedMacros;
+    $this->_state = self::STATE_QUEUE;
+  }
+
+  public function update($emitter, $notification) {
+    parent::update($emitter, $notification);
   }
   
   protected function _filter($emitter, $notification) {
     switch($notification->type) {
-      case 'context':
-        $this->_state = self::STATE_ACCEPT;
+      case 'priority':
+        if($notification->priority == 'hint') {
+          $this->_state = self::STATE_DROP;
+        }
         break;
       case 'extension':
         $this->_state = self::STATE_QUEUE;
@@ -41,7 +48,22 @@ class Dialplan_Builder_MacroFilter extends Dialplan_Builder_Filter {
           $this->_state = self::STATE_DROP;
         }
         break;
+        case 'newline':
+        case 'fileend':
+          if($this->_state == self::STATE_ACCEPT) {
+            $this->flush();
+          }
+          break;
     }
+
+  }
+
+  public function getNotificationTypes() {
+    $types = array_merge(
+            parent::getNotificationTypes(),
+            array('priority', 'extension', 'application', 'parameter', 'fileend', 'newline')
+            );
+    return array_keys(array_flip($types));
   }
 
   public function getAllowedMacros() {

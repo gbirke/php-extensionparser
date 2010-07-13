@@ -60,13 +60,11 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
   public function update($emitter, $notification) {
     $oldstate = $this->_state;
     $this->_filter($emitter, $notification);
-
+    
     if($this->_state == self::STATE_ACCEPT) {
       // If state changes to "accept", notify the observers of all previous events
       if($oldstate == self::STATE_QUEUE) {
-        while($event = array_shift($this->_eventQueue)) {
-          $this->notify($this, $event);
-        }
+        $this->flush();
       }
       $this->notify($this, $notification);
     }
@@ -92,7 +90,20 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
         $types = array_merge($types, $observer->getNotificationTypes());
       }
     }
-    return array_values(array_unique($types));
+    return array_keys(array_flip($types));
+  }
+
+  /**
+   * Send content of notification queue to all observers
+   */
+  public function flush() {
+    while($event = array_shift($this->_eventQueue)) {
+      $this->notify($this, $event);
+    }
+  }
+
+  public function getNotificationTypes() {
+    return $this->getNotificationTypesFromObservers();
   }
 
   public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
