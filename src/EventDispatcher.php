@@ -92,5 +92,33 @@ class EventDispatcher implements IEventDispatcher {
       }
     }
   }
+
+  /**
+   * Get all attached observers for an event.
+   *
+   * If $eventname is "ALL", all observers for all events will be returned, one
+   * instance of each observer.
+   *
+   * @param string $eventname
+   * @return array
+   */
+  public function getObservers($eventname = 'ALL') {
+    $return = array();
+    if($eventname == 'ALL') {
+      $keys = array_keys($this->_observers);
+    }
+    else {
+      $keys = array($eventname);
+    }
+    foreach($keys as $event) {
+      if(!empty($this->_observers[$event])) {
+        foreach($this->_observers[$event] as $observer) {
+          if(!in_array($observer, $return, true))
+            $return[] = $observer;
+        }
+      }
+    }
+    return $return;
+  }
 }
 ?>
