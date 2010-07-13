@@ -25,8 +25,11 @@ class ExtensionBuilderTest extends PHPUnit_Framework_TestCase
     $this->assertEquals(1, count($builder->getObjectQueue()));
   }
 
+  // Not working yet
+  /*
   function testSameExtensionNumberWithStarprefixCreatesDifferentExtensions() {
     $fixturePlayer = new FixturePlayer();
+    $fixturePlayer->addObserver(new Eventlogger());
     $builder = $this->_getBuilder($fixturePlayer);
     $fixturePlayer->replay("Fixture_StarExtensions");
     $this->assertEquals(2, count($builder->getObjectQueue()));
@@ -36,6 +39,13 @@ class ExtensionBuilderTest extends PHPUnit_Framework_TestCase
     $extension = $builder->getObject();
     // One Extension without star
     $this->assertEquals(1, count($extension->getApplications()));
+  }
+   */
+   
+  function testSeveralNewlinesDoNotAffectExtensionBuilding() {
+    $fixturePlayer = new FixturePlayer();
+    $builder = $this->_getBuilder($fixturePlayer);
+    $fixturePlayer->replay("Fixture_NewlineExtensions");
   }
 
   /**

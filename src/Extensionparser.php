@@ -81,8 +81,8 @@ class Extensionparser implements IEventDispatcher {
    * @param string $line
    */
   protected function _parseLine($line) {
-    $this->notify($this, new Parserevent('newline', array('newline' => $line, 'number' => $this->_line)));
     $line = trim($line);
+    $this->notify($this, new Parserevent('newline', array('newline' => $line, 'number' => $this->_line)));
     if(!$line)
       return;
     // Match Contexts

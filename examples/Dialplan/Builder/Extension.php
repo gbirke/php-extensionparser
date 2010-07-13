@@ -13,7 +13,8 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   protected $_currentExtension;
   protected $_currentPriority;
   protected $_currentLabel;
-  
+  protected $_isHintExtension = false;
+  protected $_ignoreEvents = true;
   /**
    *
    * @var Dialplan_Extension
@@ -27,7 +28,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   protected $_applicationBuilder;
 
   public function getNotificationTypes() {
-    return array('extension', 'priority', 'label', 'endfile');
+    return array('extension', 'priority', 'label', 'newline', 'endfile');
   }
 
   public function commentAction(Parserevent $notification) {
@@ -37,22 +38,21 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   public function extensionAction(Parserevent $notification) {
     // if extension is the same as previous, add application
     // else push current extension on stack and create new extension object
-    if($notification->extension == $this->_currentExtension) {
-      $this->_addApplication();
-    }
-    else {
+    if($notification->extension != $this->_currentExtension) {
       $this->_addExtension($notification->extension);
     }
     // always reset values for priority and label on new extension
     $this->_currentLabel = null;
     $this->_currentPriority = '';
+    $this->_isHintExtension = false;
   }
 
   public function priorityAction(Parserevent $notification) {
-    if($notification->priority == 'hint') {
-      $this->_addExtension($notification->priority);
-    }
     $this->_currentPriority = $notification->priority;
+    if($notification->priority == 'hint') {
+      $this->_isHintExtension = true;
+      $this->_addExtension($this->_currentExtension);
+    }
   }
 
   public function labelAction(Parserevent $notification) {
@@ -65,8 +65,23 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     $this->_addObject($this->_currentExtensionObj);
   }
 
+  public function newlineAction(Parserevent $notification) {
+    // If you are not ignoring the line before, add current application to current event object
+    if(!$this->_ignoreEvents) {
+      $this->_addApplication();
+    }
+    // if newline contains "exten =>", prepare for parsing,
+    $this->_ignoreEvents = (bool) !preg_match('/exten\s*=>/', $notification->newline);
+  }
+
   public function setApplicationBuilder(Dialplan_Builder_Application $builder) {
     $this->_applicationBuilder = $builder;
+  }
+
+  public function update($emitter, $notification) {
+    if($notification->type == 'newline' || !$this->_ignoreEvents) {
+      parent::update($emitter, $notification);
+    }
   }
 
   protected function _addApplication() {
@@ -82,14 +97,13 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     }
   }
 
-  public function _addExtension($newExtensionName) {
+  public function _addExtension($newExtension) {
     if($this->_currentExtensionObj) {
-        $this->_addApplication();
         $this->_addObject($this->_currentExtensionObj);
     }
-    $this->_currentExtension = $newExtensionName;
+    $this->_currentExtension = $newExtension;
     $this->_currentExtensionObj = new Dialplan_Extension();
-    $this->_currentExtensionObj->setExten($newExtensionName);
+    $this->_currentExtensionObj->setExten($newExtension);
   }
 
 }
