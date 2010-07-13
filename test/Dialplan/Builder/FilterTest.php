@@ -58,6 +58,16 @@ class Dialplan_Builder_FilterTest extends PHPUnit_Framework_TestCase implements 
     $this->assertEquals($events, $this->_notifications);
   }
 
+  public function testGetNotoficationTypesFromObservers() {
+    $observer1 = new TestObserver();
+    $observer1->setNotificationTypes(array('foo', 'bar'));
+    $observer2 = new TestObserver();
+    $observer2->setNotificationTypes(array('bar', 'baz'));
+    $this->_filter->addObserver($observer1)
+            ->addObserver($observer2);
+    $this->assertEquals(array('foo', 'bar', 'baz'), $this->_filter->getNotificationTypesFromObservers());
+  }
+
   protected function _sendEvents($events) {
     foreach ($events as $evt) {
       $this->_filter->update($this, $evt);

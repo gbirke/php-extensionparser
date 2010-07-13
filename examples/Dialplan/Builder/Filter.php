@@ -79,6 +79,21 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
     }
   }
 
+  /**
+   * Return the notification types from all observers that have the method
+   * 'getNotificationTypes'.
+   *
+   * @return array
+   */
+  public function getNotificationTypesFromObservers() {
+    $types = array();
+    foreach($this->_eventDispatcher->getObservers() as $observer) {
+      if(method_exists($observer, 'getNotificationTypes')) {
+        $types = array_merge($types, $observer->getNotificationTypes());
+      }
+    }
+    return array_values(array_unique($types));
+  }
 
   public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
     $this->_eventDispatcher->addObserver($observer, $eventname);
