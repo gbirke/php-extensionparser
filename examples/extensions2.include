@@ -1,0 +1,16 @@
+[local-extensions]
+
+exten => 1001,1,Macro(tl-userextension,SIP/1001,1001)
+exten => 1001,hint,SIP/1001
+exten => 1002,1,Macro(tl-userextension,SIP/1002,1002)
+exten => 1002,hint,SIP/1002
+exten => 1003,1,Macro(tl-userextension,SIP/1003,1003)
+exten => 1003,hint,SIP/1003
+
+[feature-extensions]
+
+exten => *41,1,Macro(tl-directory,default,from-inside) ; Company directory, dial by name
+exten => *51,1,Macro(tl-web-record) ; Voice Prompt recording using web callback
+exten => *72,1,Macro(tl-callforward-prompt,CFA) ; Call Forward Always Activation
+exten => *73,1,Macro(tl-cancelforward-prompt,CFA) ; Call Forward Always Deactivation
+exten => _*73.,1,Macro(tl-cancelforward-dialed,CFA) ; Call Forward Always Deactivation
