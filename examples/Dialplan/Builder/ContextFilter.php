@@ -34,6 +34,7 @@ class Dialplan_Builder_ContextFilter extends Dialplan_Builder_Filter {
 
   public function setAllowedContexts($allowedContexts) {
     $this->_allowedContexts = $allowedContexts;
+    return $this;
   }
 
 

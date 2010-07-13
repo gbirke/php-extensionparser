@@ -50,6 +50,7 @@ class Dialplan_Builder_MacroFilter extends Dialplan_Builder_Filter {
 
   public function setAllowedMacros($allowedMacros) {
     $this->_allowedMacros = $allowedMacros;
+    return $this;
   }
 
 
