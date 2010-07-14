@@ -61,7 +61,9 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
 
   public function endfileAction(Parserevent $notification) {
     // Push the last extension on the stack when the file ends
-    $this->_addApplication();
+    if(!$this->_ignoreEvents) {
+      $this->_addApplication();
+    }
     $this->_addObject($this->_currentExtensionObj);
   }
 
@@ -79,7 +81,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   }
 
   public function update($emitter, $notification) {
-    if($notification->type == 'newline' || !$this->_ignoreEvents) {
+    if($notification->type == 'newline' || $notification->type == 'endfile' || !$this->_ignoreEvents) {
       parent::update($emitter, $notification);
     }
   }

@@ -26,7 +26,7 @@ class Eventlogger implements IExtensionObserver {
       $class = get_class($emitter);
       echo "[EVENT] {$notification->type} from {$class}\n";
       foreach($notification->getProperties() as $name => $prop) {
-        printf("   %20s:%s\n", $name, $prop);
+        printf("   %-10s: %s\n", $name, $prop);
       }
     }
   }

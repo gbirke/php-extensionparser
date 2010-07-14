@@ -10,6 +10,18 @@ require_once TEST_DIR.'/autoload.php';
 class ExtensionBuilderTest extends PHPUnit_Framework_TestCase
 {
 
+  /**
+   *
+   * @var Dialplan_Builder_Application
+   */
+  protected $_applicationBuilder;
+
+  /**
+   *
+   * @var Dialplan_Builder_Extension
+   */
+  protected $_extensionBuilder;
+
   function testApplicationsAreAssembled() {
     $fixturePlayer = new FixturePlayer();
     $builder = $this->_getBuilder($fixturePlayer);
@@ -25,22 +37,18 @@ class ExtensionBuilderTest extends PHPUnit_Framework_TestCase
     $this->assertEquals(1, count($builder->getObjectQueue()));
   }
 
-  // Not working yet
-  /*
   function testSameExtensionNumberWithStarprefixCreatesDifferentExtensions() {
     $fixturePlayer = new FixturePlayer();
-    $fixturePlayer->addObserver(new Eventlogger());
     $builder = $this->_getBuilder($fixturePlayer);
     $fixturePlayer->replay("Fixture_StarExtensions");
-    $this->assertEquals(2, count($builder->getObjectQueue()));
+    $this->assertEquals(2, count($builder->getObjectQueue()), "Two extension objects expected.");
     $extension = $builder->getObject();
-    // Three Star Extension
+    // Three star extensions
     $this->assertEquals(3, count($extension->getApplications()));
     $extension = $builder->getObject();
-    // One Extension without star
+    // One extension without star
     $this->assertEquals(1, count($extension->getApplications()));
   }
-   */
    
   function testSeveralNewlinesDoNotAffectExtensionBuilding() {
     $fixturePlayer = new FixturePlayer();
@@ -53,12 +61,12 @@ class ExtensionBuilderTest extends PHPUnit_Framework_TestCase
    * @return Dialplan_Builder_Extension
    */
   protected function _getBuilder($fixturePlayer) {
-    $applicationBuilder = new Dialplan_Builder_Application();
-    $extensionbuilder = new Dialplan_Builder_Extension();
-    $extensionbuilder->setApplicationBuilder($applicationBuilder);
-    $fixturePlayer->addObserver($applicationBuilder, $applicationBuilder->getNotificationTypes());
-    $fixturePlayer->addObserver($extensionbuilder, $extensionbuilder->getNotificationTypes());
-    return $extensionbuilder;
+    $this->_applicationBuilder = new Dialplan_Builder_Application();
+    $this->_extensionbuilder = new Dialplan_Builder_Extension();
+    $this->_extensionbuilder->setApplicationBuilder($this->_applicationBuilder);
+    $fixturePlayer->addObserver($this->_applicationBuilder, $this->_applicationBuilder->getNotificationTypes());
+    $fixturePlayer->addObserver($this->_extensionbuilder, $this->_extensionbuilder->getNotificationTypes());
+    return $this->_extensionbuilder;
   }
 
   
