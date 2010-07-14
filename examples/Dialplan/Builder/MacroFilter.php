@@ -19,7 +19,10 @@ class Dialplan_Builder_MacroFilter extends Dialplan_Builder_Filter {
   }
 
   public function update($emitter, $notification) {
+    $statenames = array(1 => 'ACCEPT', 2=> 'DROP', 3 => 'QUEUE');
+    $s = "{$notification->type} ".$statenames[$this->_state].' -> ';
     parent::update($emitter, $notification);
+    echo $s. $statenames[$this->_state]."\n";
   }
   
   protected function _filter($emitter, $notification) {
@@ -49,10 +52,13 @@ class Dialplan_Builder_MacroFilter extends Dialplan_Builder_Filter {
         }
         break;
         case 'newline':
-        case 'fileend':
-          if($this->_state == self::STATE_ACCEPT) {
-            $this->flush();
+          if($this->_state != self::STATE_ACCEPT) {
+            $this->_eventQueue = array();
           }
+          $this->_state = self::STATE_ACCEPT;
+          break;
+        case 'fileend':
+          $this->_state = self::STATE_ACCEPT;
           break;
     }
 

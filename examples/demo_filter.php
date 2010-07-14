@@ -16,6 +16,7 @@ $abuilder = new Dialplan_Builder_Application();
 $ebuilder = new Dialplan_Builder_Extension();
 $ebuilder->setApplicationBuilder($abuilder);
 $macroFilter->setAllowedMacros(array('tl-userextension'))
+        ->addObserver(new Eventlogger())
        ->addObserver($abuilder, $abuilder->getNotificationTypes())
        ->addObserver($ebuilder, $ebuilder->getNotificationTypes());
 $contextFilter->setAllowedContexts(array('local-extensions'))
@@ -23,6 +24,7 @@ $contextFilter->setAllowedContexts(array('local-extensions'))
 $parser->addObserver($contextFilter, $contextFilter->getNotificationTypes());
 $parser->parse($fn);
 
+//print_r($ebuilder);
 foreach($ebuilder as $exten) {
   echo $exten;
 }

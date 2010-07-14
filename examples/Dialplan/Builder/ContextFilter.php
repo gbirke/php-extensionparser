@@ -26,6 +26,9 @@ class Dialplan_Builder_ContextFilter extends Dialplan_Builder_Filter {
         $this->_state = self::STATE_DROP;
       }
     }
+    elseif($notification->type == 'endfile') {
+      $this->_state = self::STATE_ACCEPT;
+    }
   }
 
   public function getNotificationTypes() {
