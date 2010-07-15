@@ -41,6 +41,13 @@ class EventDispatcherTest extends PHPUnit_Framework_TestCase
     $this->_dispatcher->addObserver($observer2, array('EVT1','EVT2'));
     $this->assertEquals(array($observer1, $observer2), $this->_dispatcher->getObservers('ALL'));
   }
+
+  public function testNotifyAllOnlyNotfiesOncePerObserver() {
+    $observer = new TestObserver();
+    $this->_dispatcher->addObserver($observer, array('ALL', 'EVT1'));
+    $this->_dispatcher->notify($this, new ParserEvent('EVT1'));
+    $this->assertEquals(1, count($observer->getNotifications()));
+  }
    
 }
 ?>

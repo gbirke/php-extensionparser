@@ -12,8 +12,10 @@ class TestObserver implements IExtensionObserver {
 
   protected $_notificationTypes = array();
 
+  protected $_notifications = array();
+
   public function update($emitter, $notification) {
-    // do nothing
+    $this->_notifications[] = $notification;
   }
   
   public function getNotificationTypes() {
@@ -23,6 +25,10 @@ class TestObserver implements IExtensionObserver {
   public function setNotificationTypes($notificationTypes) {
     $this->_notificationTypes = $notificationTypes;
     return $this;
+  }
+
+  public function getNotifications() {
+    return $this->_notifications;
   }
 
 

@@ -82,12 +82,16 @@ class EventDispatcher implements IEventDispatcher {
    */
   public function notify($emitter, Parserevent $notification) {
     $eventnames = array('ALL', $notification->type);
+    $notified = array();
     foreach($eventnames as $evt) {
       if(!empty($this->_observers[$evt])) {
         foreach($this->_observers[$evt] as $observer) {
-          $observer->update($emitter, $notification);
-          if($notification->notificationIsCanceled())
-                  break 2;
+          if(!in_array($observer, $notified)) {
+            $observer->update($emitter, $notification);
+            $notified[] = $observer;
+            if($notification->notificationIsCanceled())
+                    break 2;
+          }
         }
       }
     }
