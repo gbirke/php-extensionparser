@@ -26,6 +26,10 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
    */
   protected $_eventQueue = array();
 
+  protected $_debugOutput = false;
+
+  protected $_stateNames = array(1 => 'ACCEPT', 2=> 'DROP', 3 => 'QUEUE');
+
   const STATE_ACCEPT = 1;
   const STATE_DROP   = 2;
   const STATE_QUEUE  = 3;
@@ -59,6 +63,7 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
    */
   public function update($emitter, $notification) {
     $oldstate = $this->_state;
+    $debugOutput =  "{$notification->type} ".$this->_stateNames[$this->_state].' -> ';
     $this->_filter($emitter, $notification);
     
     if($this->_state == self::STATE_ACCEPT) {
@@ -74,6 +79,9 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
     // If state changes to "drop", drop all previous events
     elseif($this->_state == self::STATE_DROP && $oldstate == self::STATE_QUEUE) {
       $this->_eventQueue = array();
+    }
+    if($this->_debugOutput) {
+      echo $debugOutput . $this->_stateNames[$this->_state]."\n";
     }
   }
 
@@ -121,5 +129,14 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
     return $this;
   }
 
+  public function debugOutputOn() {
+    $this->_debugOutput = true;
+    return $this;
+  }
+
+  public function debugOutputOff() {
+    $this->_debugOutput = false;
+    return $this;
+  }
 }
 ?>
