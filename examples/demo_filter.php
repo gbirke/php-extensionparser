@@ -1,8 +1,11 @@
 <?php
 /* 
  * This demo shows how to use filters.
- * It will chain ContextFilter and MacroFilter to return only speciafic macro
+ * It will chain ContextFilter and MacroFilter to return only specific macro
  * extensions from a specific context.
+ *
+ * The event passing chain looks like this:
+ * Parser -> Context filter -> Macro Filter -> Builders
  */
 
 require_once dirname(__FILE__).'/autoload.php';
@@ -16,7 +19,6 @@ $abuilder = new Dialplan_Builder_Application();
 $ebuilder = new Dialplan_Builder_Extension();
 $ebuilder->setApplicationBuilder($abuilder);
 $macroFilter->setAllowedMacros(array('tl-userextension'))
-        ->addObserver(new Eventlogger())
        ->addObserver($abuilder, $abuilder->getNotificationTypes())
        ->addObserver($ebuilder, $ebuilder->getNotificationTypes());
 $contextFilter->setAllowedContexts(array('local-extensions'))
@@ -24,7 +26,7 @@ $contextFilter->setAllowedContexts(array('local-extensions'))
 $parser->addObserver($contextFilter, $contextFilter->getNotificationTypes());
 $parser->parse($fn);
 
-//print_r($ebuilder);
+echo "These are the macro extensions that were found:\n";
 foreach($ebuilder as $exten) {
   echo $exten;
 }

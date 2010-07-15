@@ -54,6 +54,19 @@ class ExtensionBuilderTest extends PHPUnit_Framework_TestCase
     $fixturePlayer = new FixturePlayer();
     $builder = $this->_getBuilder($fixturePlayer);
     $fixturePlayer->replay("Fixture_NewlineExtensions");
+    $this->assertEquals(2, count($builder->getObjectQueue()));
+  }
+
+  function testSkippedLinesWithoutEventsDoNotBuildNewExtensions() {
+    $fixturePlayer = new FixturePlayer();
+    $builder = $this->_getBuilder($fixturePlayer);
+    $fixturePlayer->replay("Fixture_SkippedExtensionNewlines");
+    $queue = $builder->getObjectQueue();
+    //array_walk($queue, 'print_r');
+    //print_r($queue);
+    $firstExtension = $queue[0];
+    $this->assertEquals(1, count($firstExtension->getApplications()), "Each extension should have only one application");
+    $this->assertEquals(3, count($queue));
   }
 
   /**

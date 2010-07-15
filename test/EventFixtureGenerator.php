@@ -32,5 +32,8 @@ class EventFixtureGenerator implements IExtensionObserver {
     return $code;
   }
 
+  public function getNotificationTypes() {
+    return array('ALL');
+  }
 }
 ?>

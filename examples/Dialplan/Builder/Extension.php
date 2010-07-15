@@ -15,6 +15,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
   protected $_currentLabel;
   protected $_isHintExtension = false;
   protected $_ignoreEvents = true;
+  protected $_processedEventsAfterNewline = 0;
   /**
    *
    * @var Dialplan_Extension
@@ -69,9 +70,10 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
 
   public function newlineAction(Parserevent $notification) {
     // If you are not ignoring the line before, add current application to current event object
-    if(!$this->_ignoreEvents) {
+    if(!$this->_ignoreEvents && $this->_processedEventsAfterNewline) {
       $this->_addApplication();
     }
+    $this->_processedEventsAfterNewline = 0;
     // if newline contains "exten =>", prepare for parsing,
     $this->_ignoreEvents = (bool) !preg_match('/exten\s*=>/', $notification->newline);
   }
@@ -82,6 +84,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
 
   public function update($emitter, $notification) {
     if($notification->type == 'newline' || $notification->type == 'endfile' || !$this->_ignoreEvents) {
+      if($notification->type != 'newline') $this->_processedEventsAfterNewline++;
       parent::update($emitter, $notification);
     }
   }
