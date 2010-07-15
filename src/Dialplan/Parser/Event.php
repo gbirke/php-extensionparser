@@ -1,15 +1,13 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
  */
 
 /**
- * Description of Parserevent
+ * Each parser event has a type and additional properties
  *
  * @author birke
  */
-class Parserevent {
+class Dialplan_Parser_Event {
 
   protected $_properties = array();
 

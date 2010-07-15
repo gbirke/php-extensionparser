@@ -7,7 +7,6 @@ require_once TEST_DIR.'/autoload.php';
 
 // Set up command line option parser
 require_once 'Console/CommandLine.php';
-
 $cmdparser = new Console_CommandLine();
 $cmdparser->description = 'Generate event fixture files from dialplan extension files.';
 $cmdparser->version = '1.0';
@@ -27,7 +26,7 @@ try {
     exit;
 }
 
-$parser = new Extensionparser();
+$parser = new Dialplan_Parser();
 $fixtureGenerator = new EventFixtureGenerator();
 if(!empty($cmdline->options['filterchain'])) {
   $filter = include $cmdline->options['filterchain'];

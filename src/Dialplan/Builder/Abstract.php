@@ -4,14 +4,12 @@
 
 /**
  * The Abstract builder is the base class for builders that receive and process
- * Parservenet objects from the Extensionparser  to custruct data structures
+ * Dialplan_Parser_Event objects from the Dialplan_Parser to construct data structures
  * from the event data.
- *
- *
  *
  * @author gbirke
  */
-abstract class Dialplan_Builder_Abstract implements IExtensionObserver, Iterator {
+abstract class Dialplan_Builder_Abstract implements Dialplan_Parser_IExtensionObserver, Iterator {
 
   /**
    * Return the names of all events the subclass reacts to.
@@ -35,22 +33,34 @@ abstract class Dialplan_Builder_Abstract implements IExtensionObserver, Iterator
    * No error checking is done at the moment.
    *
    * @param object $emitter
-   * @param Parserevent $notification
+   * @param Dialplan_Parser_Event $notification
    */
   public function update($emitter, $notification) {
     $method = $notification->type.'Action';
     $this->$method($notification);
   }
 
+  /**
+   * Put an object on the object queue
+   * @param object $object
+   */
   protected function _addObject($object) {
     if($object)
       $this->_objectQueue[] = $object;
   }
 
+  /**
+   * Get first object from object queue
+   * @return mixed
+   */
   public function getObject() {
     return array_shift($this->_objectQueue);
   }
 
+  /**
+   * Return full object queue
+   * @return array
+   */
   public function getObjectQueue() {
     return $this->_objectQueue;
   }
@@ -74,6 +84,4 @@ abstract class Dialplan_Builder_Abstract implements IExtensionObserver, Iterator
   public function valid() {
     return (bool) $this->current();
   }
-
 }
-?>

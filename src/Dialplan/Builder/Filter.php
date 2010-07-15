@@ -1,20 +1,21 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
  */
 
 /**
  * This is the base class for a stateful filter that collects events and either
- * drops them or passes them on the the registered observers.
+ * drops them, passes them on the the registered observers or stores them in a
+ * queue that is dropped or flushed.
  *
  * @author gbirke
  */
-abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionObserver {
+abstract class Dialplan_Builder_Filter 
+  implements Dialplan_Parser_IEventDispatcher, Dialplan_Parser_IExtensionObserver
+{
 
   /**
    *
-   * @var EventDispatcher
+   * @var Dialplan_Parser_EventDispatcher
    */
   protected $_eventDispatcher;
 
@@ -37,15 +38,15 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
   /**
    * Constructs the Filter object.
    *
-   * If $eventDispatcher is null, an instance of EventDispatcher will be used.
+   * If $eventDispatcher is null, an instance of EventDispatcher will be created.
    *
-   * @param EventDispatcher $eventDispatcher
+   * @param Dialplan_Parser_EventDispatcher $eventDispatcher
    */
   public function __construct($eventDispatcher = null) {
     if($eventDispatcher)
       $this->_eventDispatcher = $eventDispatcher;
     else
-      $this->_eventDispatcher = new EventDispatcher();
+      $this->_eventDispatcher = new Dialplan_Parser_EventDispatcher();
   }
 
   /**
@@ -114,17 +115,17 @@ abstract class Dialplan_Builder_Filter implements IEventDispatcher, IExtensionOb
     return $this->getNotificationTypesFromObservers();
   }
 
-  public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
+  public function addObserver(Dialplan_Parser_IExtensionObserver $observer, $eventname = 'ALL') {
     $this->_eventDispatcher->addObserver($observer, $eventname);
     return $this;
   }
 
-  public function removeObserver(IExtensionObserver $observer, $eventname = 'ALL') {
+  public function removeObserver(Dialplan_Parser_IExtensionObserver $observer, $eventname = 'ALL') {
     $this->_eventDispatcher->removeObserver($observer, $eventname);
     return $this;
   }
 
-  public function notify($emitter, Parserevent $notification) {
+  public function notify($emitter, Dialplan_Parser_Event $notification) {
     $this->_eventDispatcher->notify($emitter, $notification);
     return $this;
   }

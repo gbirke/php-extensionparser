@@ -7,7 +7,7 @@
  *
  * @author birke
  */
-class Eventrecorder implements IExtensionObserver {
+class Eventrecorder implements Dialplan_Parser_IExtensionObserver {
 
   protected $_notifications = array();
 

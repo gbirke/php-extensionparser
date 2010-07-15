@@ -1,19 +1,19 @@
 <?php
 /* 
- * This file contains the Extensionparser class
+ * This file contains the Dialplan_Parser class
  */
 
 /**
- * Extensionparser is a class that parses an Asterisk extension file.
+ * This is a class that parses an Asterisk extension file.
  *
  * Other classes can attach themselves als listeners to the parser. For each
  * "component" of the extension file (e.g. extension number, priority, application),
- * the parser creates a Parserevent object and sends that object to all attached
+ * the parser creates an Event object and sends that object to all attached
  * listeners.
  *
  * @author birke
  */
-class Extensionparser implements IEventDispatcher {
+class Dialplan_Parser implements Dialplan_Parser_IEventDispatcher {
   
   /**
    * The current line number
@@ -23,7 +23,7 @@ class Extensionparser implements IEventDispatcher {
 
   /**
    *
-   * @var EventDispatcher
+   * @var Dialplan_Parser_EventDispatcher
    */
   protected $_eventDispatcher;
 
@@ -42,37 +42,37 @@ class Extensionparser implements IEventDispatcher {
   /**
    * Constructs the Parser object.
    *
-   * If $eventDispatcher is null, an instance of EventDispatcher will be used.
+   * If $eventDispatcher is null, an instance of EventDispatcher will be created.
    *
-   * @param EventDispatcher $eventDispatcher
+   * @param Dialplan_Parser_EventDispatcher $eventDispatcher
    */
   public function __construct($eventDispatcher = null) {
     if($eventDispatcher)
       $this->_eventDispatcher = $eventDispatcher;
     else
-      $this->_eventDispatcher = new EventDispatcher();
+      $this->_eventDispatcher = new Dialplan_Parser_EventDispatcher();
   }
 
   /**
    * Read the selected resource line by line and notify all listeners with
-   * Parserevent objects.
+   * Event objects.
    *
    * @param string $resourceName A file name or a PHP stream URL
-   * @return Extensionparser
+   * @return Dialplan_Parser
    */
   function parse($resourceName) {
     $fh = fopen($resourceName, 'r');
     if(!$fh) {
-      throw new ParserException("Cound not open $resourceName");
+      throw new Dialplan_Parser_Exception("Cound not open $resourceName");
     }
-    $this->notify($this, new Parserevent('startfile', array('startfile' => $resourceName)));
+    $this->notify($this, new Dialplan_Parser_Event('startfile', array('startfile' => $resourceName)));
     while(!feof($fh)) {
       $line = fgets($fh, 2048);
       $this->_parseLine($line);
       $this->_line++;
     }
     fclose($fh);
-    $this->notify($this, new Parserevent('endfile', array('endfile' => $resourceName)));
+    $this->notify($this, new Dialplan_Parser_Event('endfile', array('endfile' => $resourceName)));
     return $this;
   }
 
@@ -82,22 +82,22 @@ class Extensionparser implements IEventDispatcher {
    */
   protected function _parseLine($line) {
     $line = trim($line);
-    $this->notify($this, new Parserevent('newline', array('newline' => $line, 'number' => $this->_line)));
+    $this->notify($this, new Dialplan_Parser_Event('newline', array('newline' => $line, 'number' => $this->_line)));
     if(!$line)
       return;
     // Match Contexts
     if(preg_match('/^\\[([a-z0-9A-Z_\-]+)\]\s*(.*)$/', $line, $matches)) {
       if($matches[1] == 'general') {
         $this->_ctx_type = self::CTX_GENERAL;
-        $this->notify($this, new Parserevent('generalsettings', array('generalsettings' => $matches[1])));
+        $this->notify($this, new Dialplan_Parser_Event('generalsettings', array('generalsettings' => $matches[1])));
       }
       elseif ($matches['1'] == 'globals') {
         $this->_ctx_type = self::CTX_GLOBALS;
-        $this->notify($this, new Parserevent('globalvariables', array('globalvariables' => $matches[1])));
+        $this->notify($this, new Dialplan_Parser_Event('globalvariables', array('globalvariables' => $matches[1])));
       }
       else {
         $this->_ctx_type = self::CTX_DEFAULT;
-        $this->notify($this, new Parserevent('context', array('context' => $matches[1])));
+        $this->notify($this, new Dialplan_Parser_Event('context', array('context' => $matches[1])));
       }
       if(!empty($matches[2])) {
         $this->_parseComment($matches[2], "context");
@@ -109,18 +109,18 @@ class Extensionparser implements IEventDispatcher {
     }
     // Match single-line-comments
     elseif ($line[0] == ';') {
-      $this->notify($this, new Parserevent('comment', array('comment' => substr($line, 1), 'context' => "line")));
+      $this->notify($this, new Dialplan_Parser_Event('comment', array('comment' => substr($line, 1), 'context' => "line")));
     }
     // Match including of other contexts
     elseif (preg_match('/^include\s*=>\s*([^;]+)(.*)/', $line, $matches)) {
-      $this->notify($this, new Parserevent('include_context', array('include_context' => trim($matches[1]))));
+      $this->notify($this, new Dialplan_Parser_Event('include_context', array('include_context' => trim($matches[1]))));
       if(!empty($matches[2])) {
         $this->_parseComment($matches[2], "context");
       }
     }
     // Match including of other files
     elseif (preg_match('/^#include\s*([^;]+)(.*)/', $line, $matches)) {
-      $this->notify($this, new Parserevent('include_file', array('include_file' => trim($matches[1]))));
+      $this->notify($this, new Dialplan_Parser_Event('include_file', array('include_file' => trim($matches[1]))));
       if(!empty($matches[2])) {
         $this->_parseComment($matches[2], "context");
       }
@@ -128,20 +128,20 @@ class Extensionparser implements IEventDispatcher {
     // Match assignments in [general] and [globals] context
     elseif(preg_match('/^([a-z0-9A-Z\-_]+)\s*=\s*([^;]*)(.*)/', $line, $matches)) {
       if($this->_ctx_type == self::CTX_GENERAL) {
-        $this->notify($this, new ParserEvent('setting', array('setting' => $matches[1], 'value' => trim($matches[2]))));
+        $this->notify($this, new Dialplan_Parser_Event('setting', array('setting' => $matches[1], 'value' => trim($matches[2]))));
       }
       elseif ($this->_ctx_type == self::CTX_GLOBALS) {
-        $this->notify($this, new ParserEvent('global', array('global' => $matches[1], 'value' => trim($matches[2]))));
+        $this->notify($this, new Dialplan_Parser_Event('global', array('global' => $matches[1], 'value' => trim($matches[2]))));
       }
       else {
-        throw new ParserSyntaxErrorException("Invalid statement: $line", $this->_line);
+        throw new Dialplan_Parser_SyntaxErrorException("Invalid statement: $line", $this->_line);
       }
       if(!empty($matches[3])) {
         $this->_parseComment($matches[3], "setting");
       }
     }
     else {
-      throw new ParserSyntaxErrorException("Invalid statement: $line", $this->_line);
+      throw new Dialplan_Parser_SyntaxErrorException("Invalid statement: $line", $this->_line);
     }
 
   }
@@ -155,11 +155,11 @@ class Extensionparser implements IEventDispatcher {
     list($exten, $rest) = explode(',', $line, 2);
     $exten = trim($exten);
     if(preg_match('/^([a-zA-Z0-9#*]+|_[a-zA-Z0-9#*.\\[\\]!]+)$/', $exten)) {
-      $this->notify($this, new Parserevent('extension', array('extension' => $exten)));
+      $this->notify($this, new Dialplan_Parser_Event('extension', array('extension' => $exten)));
       $this->_parsePriority($rest);
     }
     else {
-      throw new ParserSyntaxErrorException("Invalid extension: $exten", $this->_line);
+      throw new Dialplan_Parser_SyntaxErrorException("Invalid extension: $exten", $this->_line);
     }
   }
 
@@ -173,9 +173,9 @@ class Extensionparser implements IEventDispatcher {
     list($priority, $rest) = explode(',', $line, 2);
     $priority = trim($priority);
     if(preg_match('/^(?:[0-9]+|n(?:\+[0-9]+)?|s|hint)(?:\(([a-zA-Z][a-zA-Z0-9\-_.]+)\))?$/', $priority, $matches)) {
-      $this->notify($this, new Parserevent('priority', array('priority' => $priority)));
+      $this->notify($this, new Dialplan_Parser_Event('priority', array('priority' => $priority)));
       if(!empty($matches[1])) {
-        $this->notify($this, new Parserevent('label', array('label' => $matches[1])));
+        $this->notify($this, new Dialplan_Parser_Event('label', array('label' => $matches[1])));
       }
       if($priority == 'hint') {
         $this->_parseHintChannel($rest);
@@ -185,7 +185,7 @@ class Extensionparser implements IEventDispatcher {
       }
     }
     else {
-      throw new ParserSyntaxErrorException("Invalid priority: $priority", $this->_line);
+      throw new Dialplan_Parser_SyntaxErrorException("Invalid priority: $priority", $this->_line);
     }
   }
 
@@ -195,13 +195,13 @@ class Extensionparser implements IEventDispatcher {
    */
   protected function _parseHintChannel($channel) {
     if(preg_match('@([A-Za-z0-9]+/[^; ]+)\s*(.*)$@', trim($channel), $matches)) {
-      $this->notify($this, new Parserevent('hintchannel', array('hintchannel' => $matches[1])));
+      $this->notify($this, new Dialplan_Parser_Event('hintchannel', array('hintchannel' => $matches[1])));
       if(!empty($matches[2])) {
         $this->_parseComment($matches[2], "hint");
       }
     }
     else {
-      throw new ParserSyntaxErrorException("Invalid channel: $channel", $this->_line);
+      throw new Dialplan_Parser_SyntaxErrorException("Invalid channel: $channel", $this->_line);
     }
   }
 
@@ -212,12 +212,12 @@ class Extensionparser implements IEventDispatcher {
    */
   protected function _parseApplication($line) {
     if(preg_match('/^([A-Za-z0-9]+)\((.+)/', trim($line), $matches )) {
-      $this->notify($this, new Parserevent('application', array('application' => $matches[1])));
+      $this->notify($this, new Dialplan_Parser_Event('application', array('application' => $matches[1])));
       $rest = $this->_parseParams($matches[2]);
       $this->_parseComment($rest, "extension");
     }
     else {
-      throw new ParserSyntaxErrorException("Invalid Application: $line", $this->_line);
+      throw new Dialplan_Parser_SyntaxErrorException("Invalid Application: $line", $this->_line);
     }
   }
 
@@ -233,7 +233,7 @@ class Extensionparser implements IEventDispatcher {
   protected function _parseComment($line, $context = "line") {
     $comment = trim($line);
     if(strlen($comment) > 0 && $comment[0] == ';') {
-      $this->notify($this, new Parserevent('comment', array('comment' => substr($comment, 1), "context" => $context)));
+      $this->notify($this, new Dialplan_Parser_Event('comment', array('comment' => substr($comment, 1), "context" => $context)));
     }
   }
 
@@ -259,7 +259,7 @@ class Extensionparser implements IEventDispatcher {
             break;
           elseif($openBraces == 0) {
             if($pos > 0 || $paramcount > 0) {
-              $this->notify($this, new Parserevent('parameter', array('parameter' => substr($line, 0, $pos), 'position' => $paramcount + 1)));
+              $this->notify($this, new Dialplan_Parser_Event('parameter', array('parameter' => substr($line, 0, $pos), 'position' => $paramcount + 1)));
             }
             return substr($line, $pos + 1);
           }
@@ -270,7 +270,7 @@ class Extensionparser implements IEventDispatcher {
         case ",":
           if(!$inQuotes) {
             $paramcount++;
-            $this->notify($this, new Parserevent('parameter', array('parameter' => substr($line, 0, $pos), 'position' => $paramcount)));
+            $this->notify($this, new Dialplan_Parser_Event('parameter', array('parameter' => substr($line, 0, $pos), 'position' => $paramcount)));
             $line = substr($line, $pos + 1);
             $len = strlen($line);
             $pos = -1; // Must be -1 so $pos will be 0 after $pos++
@@ -284,7 +284,7 @@ class Extensionparser implements IEventDispatcher {
       }
       $pos++;
     }
-    throw new ParserSyntaxErrorException("Unclosed brace", $this->_line);
+    throw new Dialplan_Parser_SyntaxErrorException("Unclosed brace", $this->_line);
   }
 
   /**
@@ -293,17 +293,17 @@ class Extensionparser implements IEventDispatcher {
    * @param mixed $eventname A string of array of event names.
    * @return Extensionparser
    */
-  public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
+  public function addObserver(Dialplan_Parser_IExtensionObserver $observer, $eventname = 'ALL') {
     $this->_eventDispatcher->addObserver($observer, $eventname);
     return $this;
   }
 
-  public function removeObserver(IExtensionObserver $observer, $eventname = 'ALL') {
+  public function removeObserver(Dialplan_Parser_IExtensionObserver $observer, $eventname = 'ALL') {
     $this->_eventDispatcher->removeObserver($observer, $eventname);
     return $this;
   }
 
-  public function notify($emitter, Parserevent $notification) {
+  public function notify($emitter, Dialplan_Parser_Event $notification) {
     $this->_eventDispatcher->notify($emitter, $notification);
     return $this;
   }

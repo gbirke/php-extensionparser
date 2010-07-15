@@ -8,7 +8,7 @@
  *
  * @author Gabriel Birke
  */
-class TestObserver implements IExtensionObserver {
+class TestObserver implements Dialplan_Parser_IExtensionObserver {
 
   protected $_notificationTypes = array();
 

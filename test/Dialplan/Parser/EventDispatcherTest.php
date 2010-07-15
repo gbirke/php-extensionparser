@@ -1,19 +1,19 @@
 <?php
 
 if(!defined("TEST_DIR"))
-	DEFINE("TEST_DIR", dirname(__FILE__));
+	DEFINE("TEST_DIR", realpath(dirname(__FILE__).'/../..'));
 require_once TEST_DIR.'/autoload.php';
 
-class EventDispatcherTest extends PHPUnit_Framework_TestCase
+class Dialplan_Parser_EventDispatcherTest extends PHPUnit_Framework_TestCase
 {
 
   /**
-   * @var EventDispatcher
+   * @var Dialplan_Parser_EventDispatcher
    */
   protected $_dispatcher;
 
   public function setUp() {
-    $this->_dispatcher = new EventDispatcher();
+    $this->_dispatcher = new Dialplan_Parser_EventDispatcher();
   }
 
   public function testGetObserversReturnsAllObservers() {
@@ -45,7 +45,7 @@ class EventDispatcherTest extends PHPUnit_Framework_TestCase
   public function testNotifyAllOnlyNotfiesOncePerObserver() {
     $observer = new TestObserver();
     $this->_dispatcher->addObserver($observer, array('ALL', 'EVT1'));
-    $this->_dispatcher->notify($this, new ParserEvent('EVT1'));
+    $this->_dispatcher->notify($this, new Dialplan_Parser_Event('EVT1'));
     $this->assertEquals(1, count($observer->getNotifications()));
   }
    

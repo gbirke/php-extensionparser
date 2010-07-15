@@ -3,13 +3,14 @@
  */
 
 /**
- * A simple event Event Dispatcher for Extension Parser events
+ * A simple Event dispatcher for Parser events
  *
- * You can diecide which of the attached event handlers receive which event type.
+ * You can decide which of the attached event handlers receive which event type.
+ * For all events, use the event type 'ALL'.
  *
  * @author gbirke
  */
-class EventDispatcher implements IEventDispatcher {
+class Dialplan_Parser_EventDispatcher implements Dialplan_Parser_IEventDispatcher {
 
   /**
    * A list of observers, sorted by event name
@@ -26,11 +27,11 @@ class EventDispatcher implements IEventDispatcher {
    * already registered for other events it may happen that you receive the same
    * event multiple times if you register for 'ALL' and for other events.
    *
-   * @param IExtensionObserver $observer
+   * @param Dialplan_Parser_IExtensionObserver $observer
    * @param mixed $eventname A string with a single event name or an array of event names.
-   * @return Extensionparser
+   * @return Dialplan_Parser_EventDispatcher
    */
-  public function addObserver(IExtensionObserver $observer, $eventname = 'ALL') {
+  public function addObserver(Dialplan_Parser_IExtensionObserver $observer, $eventname = 'ALL') {
     if(is_string($eventname))
       $eventname = array($eventname);
     foreach($eventname as $evt) {
@@ -52,7 +53,7 @@ class EventDispatcher implements IEventDispatcher {
    * @param mixed $eventname A string with a single event name or an array of event names.
    * @return Extensionparser
    */
-  public function removeObserver(IExtensionObserver $observer, $eventname = 'ALL') {
+  public function removeObserver(Dialplan_Parser_IExtensionObserver $observer, $eventname = 'ALL') {
     if(is_string($eventname)) {
       if($eventname == 'ALL') {
         $eventname = array_keys($this->_observers);
@@ -78,9 +79,9 @@ class EventDispatcher implements IEventDispatcher {
    * $notification->cancelNotification()
    *
    * @param object
-   * @param Parserevent $notification
+   * @param Dialplan_Parser_Event $notification
    */
-  public function notify($emitter, Parserevent $notification) {
+  public function notify($emitter, Dialplan_Parser_Event $notification) {
     $eventnames = array('ALL', $notification->type);
     $notified = array();
     foreach($eventnames as $evt) {

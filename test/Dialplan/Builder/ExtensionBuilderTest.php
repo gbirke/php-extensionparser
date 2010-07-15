@@ -9,7 +9,6 @@ require_once TEST_DIR.'/autoload.php';
  */
 class ExtensionBuilderTest extends PHPUnit_Framework_TestCase
 {
-
   /**
    *
    * @var Dialplan_Builder_Application

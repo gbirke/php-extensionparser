@@ -1,15 +1,13 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
  */
 
 /**
- * This class logs events and prints them
+ * This class logs events and prints them.
  *
  * @author birke
  */
-class Eventlogger implements IExtensionObserver {
+class Eventlogger implements Dialplan_Parser_IExtensionObserver {
 
   protected $_filter;
   

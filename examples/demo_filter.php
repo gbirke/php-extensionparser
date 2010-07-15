@@ -12,7 +12,7 @@ require_once dirname(__FILE__).'/autoload.php';
 
 $fn = empty($argv[1]) ? 'extensions2.include' : $argv[1];
 
-$parser = new Extensionparser();
+$parser = new Dialplan_Parser();
 $contextFilter = new Dialplan_Builder_ContextFilter();
 $macroFilter = new Dialplan_Builder_MacroFilter();
 $abuilder = new Dialplan_Builder_Application();

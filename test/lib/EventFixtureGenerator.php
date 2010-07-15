@@ -24,7 +24,7 @@ class EventFixtureGenerator implements IExtensionObserver {
     $code .= "  function __construct(){\n";
     $code .= "    \$this->fixtures = array(\n";
     foreach($this->_notifications as $n) {
-      $code .= "      new Parserevent('{$n->type}',".str_replace("\n", "", var_export($n->getProperties(), true))."),\n";
+      $code .= "      new Dialplan_Parser_Event('{$n->type}',".str_replace("\n", "", var_export($n->getProperties(), true))."),\n";
     }
     $code .= "    );\n";
     $code .= "  }\n";

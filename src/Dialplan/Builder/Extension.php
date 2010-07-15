@@ -4,7 +4,11 @@
  */
 
 /**
- * Description of Extension
+ * The extension builder consumes various parser events to create
+ * Dialplan_Extension objects.
+ *
+ * Whenever a newline is encountered, the extension that is currently built will
+ * be extended with a new application.
  *
  * @author gbirke
  */
@@ -32,11 +36,11 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     return array('extension', 'priority', 'label', 'newline', 'endfile');
   }
 
-  public function commentAction(Parserevent $notification) {
+  public function commentAction(Dialplan_Parser_Event $notification) {
     // Handle comment lines in front of extensions
   }
 
-  public function extensionAction(Parserevent $notification) {
+  public function extensionAction(Dialplan_Parser_Event $notification) {
     // if extension is the same as previous, add application
     // else push current extension on stack and create new extension object
     if($notification->extension != $this->_currentExtension) {
@@ -48,7 +52,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     $this->_isHintExtension = false;
   }
 
-  public function priorityAction(Parserevent $notification) {
+  public function priorityAction(Dialplan_Parser_Event $notification) {
     $this->_currentPriority = $notification->priority;
     if($notification->priority == 'hint') {
       $this->_isHintExtension = true;
@@ -56,11 +60,11 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     }
   }
 
-  public function labelAction(Parserevent $notification) {
+  public function labelAction(Dialplan_Parser_Event $notification) {
     $this->_currentLabel = $notification->label;
   }
 
-  public function endfileAction(Parserevent $notification) {
+  public function endfileAction(Dialplan_Parser_Event $notification) {
     // Push the last extension on the stack when the file ends
     if(!$this->_ignoreEvents) {
       $this->_addApplication();
@@ -68,7 +72,7 @@ class Dialplan_Builder_Extension extends Dialplan_Builder_Abstract  {
     $this->_addObject($this->_currentExtensionObj);
   }
 
-  public function newlineAction(Parserevent $notification) {
+  public function newlineAction(Dialplan_Parser_Event $notification) {
     // If you are not ignoring the line before, add current application to current event object
     if(!$this->_ignoreEvents && $this->_processedEventsAfterNewline) {
       $this->_addApplication();

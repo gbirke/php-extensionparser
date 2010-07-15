@@ -3,11 +3,12 @@ if(!defined("TEST_DIR"))
 	DEFINE("TEST_DIR", realpath(dirname(__FILE__).'/../..'));
 require_once TEST_DIR.'/autoload.php';
 
-class Dialplan_Builder_FilterTest extends PHPUnit_Framework_TestCase implements IExtensionObserver
+class Dialplan_Builder_FilterTest
+  extends PHPUnit_Framework_TestCase
+  implements Dialplan_Parser_IExtensionObserver
 {
 
   protected $_notifications;
-
 
   /**
    *
@@ -77,10 +78,9 @@ class Dialplan_Builder_FilterTest extends PHPUnit_Framework_TestCase implements 
   protected function _getFixtureEvents($eventNames) {
     $fixture = array();
     foreach($eventNames as $evt)
-      $fixture[] = new Parserevent($evt);
+      $fixture[] = new Dialplan_Parser_Event($evt);
     return $fixture;
   }
-
 
   public function update($subject, $notification) {
      $this->_notifications[] = $notification;
