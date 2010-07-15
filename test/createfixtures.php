@@ -34,7 +34,6 @@ if(!empty($cmdline->options['filterchain'])) {
   if(!$filter || !($filter instanceof Dialplan_Builder_Filter)) {
     throw new Exception("filterchain did not return a filter.");
   }
-  $filter->addObserver($fixtureGenerator);
 }
 else {
   $parser->addObserver($fixtureGenerator);
