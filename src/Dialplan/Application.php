@@ -1,11 +1,9 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
  */
 
 /**
- * Description of Application
+ * This class represents a call to a Dialplan application in an extension.
  *
  * @author gbirke
  */

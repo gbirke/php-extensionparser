@@ -1,11 +1,10 @@
 <?php
 /* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
  */
 
 /**
- * Description of Extension
+ * This class represents a single extension in an Asterisk dialplan.
+ * One extension can have several appplications with assigned priorities.
  *
  * @author gbirke
  */
@@ -71,6 +70,21 @@ class Dialplan_Extension {
    */
   public function getApplications() {
     return $this->_applications;
+  }
+
+  /**
+   * Get a specific application
+   *
+   * @throws Exception
+   * @param int $index
+   */
+  public function getApplication($index) {
+    if($index < count($this->_applications)) {
+      return $this->_applications[$index];
+    }
+    else {
+      throw new Exception("Application index out of bounds.");
+    }
   }
 
   public function getComment() {
