@@ -1,0 +1,25 @@
+[answer-menu]
+exten => s,1,GotoIf($["${TL_LEVEL}" != ""]?start)
+exten => s,n,Set(TL_LEVEL=1)
+exten => s,n,Ringing()
+exten => s,n,Wait(1)
+exten => s,n,Answer()
+exten => s,n(start),NoOp()
+exten => s,n,Set(TIMEOUT(digit)=1)
+exten => s,n,Set(TIMEOUT(response)=1)
+exten => s,n,Background(ogm/answer-menu)
+exten => t,1,Goto(recordmenu,s,1)
+exten => i,1,Goto(recordmenu,s,1)
+
+[recordmenu]
+exten => s,1,GotoIf($["${TL_LEVEL}" != ""]?start)
+exten => s,n,Set(TL_LEVEL=1)
+exten => s,n,Answer()
+exten => s,n(start),NoOp()
+exten => s,n,Set(TIMEOUT(digit)=5)
+exten => s,n,Set(TIMEOUT(response)=10)
+exten => s,n,Background(ogm/press-1-if-you-want-to-be-recorded)
+exten => 1,1,Goto(feature-extensions,99021,1)
+exten => t,1,Goto(feature-extensions,99022,1)
+exten => i,1,Goto(feature-extensions,99022,1)
+
