@@ -211,9 +211,14 @@ class Dialplan_Parser implements Dialplan_Parser_IEventDispatcher {
    * @param string $line
    */
   protected function _parseApplication($line) {
-    if(preg_match('/^([A-Za-z0-9]+)\((.+)/', trim($line), $matches )) {
+    if(preg_match('/^([A-Za-z0-9]+)\s*(.*)/', trim($line), $matches )) {
       $this->notify($this, new Dialplan_Parser_Event('application', array('application' => $matches[1])));
-      $rest = $this->_parseParams($matches[2]);
+      if($matches[2][0] == '(') {
+        $rest = $this->_parseParams(substr($matches[2], 1));
+      }
+      else {
+        $rest = $matches[2];
+      }
       $this->_parseComment($rest, "extension");
     }
     else {

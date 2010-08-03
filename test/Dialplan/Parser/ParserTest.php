@@ -222,7 +222,15 @@ class Dialplan_Parser_ParserTest
      $this->assertEvents($expected);
    }
 
-   // TODO Test brace handling
+   public function testApplicationWithoutParamBraces() {
+     $this->_parseString("exten => 1,1,Ringing", array('application', 'parameter'));
+     $expected = array(
+         new Dialplan_Parser_Event('application', array('application' => 'Ringing')),
+     );
+     $this->assertEvents($expected);
+   }
+
+   // TODO Test brace handling inside parameters
 
    public function testCommentAfterApplication() {
      $this->_parseString("exten => 1,1,NoOp();Comments FTW!\n", array('application', 'comment'));
