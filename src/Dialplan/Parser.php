@@ -63,7 +63,7 @@ class Dialplan_Parser implements Dialplan_Parser_IEventDispatcher {
   function parse($resourceName) {
     $fh = fopen($resourceName, 'r');
     if(!$fh) {
-      throw new Dialplan_Parser_Exception("Cound not open $resourceName");
+      throw new Dialplan_Parser_Exception("Could not open resource '$resourceName'");
     }
     $this->notify($this, new Dialplan_Parser_Event('startfile', array('startfile' => $resourceName)));
     while(!feof($fh)) {
