@@ -3,7 +3,7 @@
  */
 
 /**
- * This class represents an Astersik dialplan context that acts as a menu
+ * This class represents an Asterisk dialplan context that acts as a menu
  *
  * @author birke
  */

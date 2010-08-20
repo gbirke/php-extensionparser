@@ -1,9 +1,13 @@
 Extensionparser is a PHP class for parsing Asterisk extension.conf files.
-The parser reads the file and produces events for each dialplan "component"
-(extension number, priority, application, etc) it encounters.
+The parser reads the dial plan file and produces events for each dialplan
+"component" (extension number, priority, application, etc) it encounters.
 
-The example shows classes that consume parser events and build PHP data
-structures from them.
+This library also contains "Builder" classes that consume the parser events
+and some classes that represent dial plan objects: Contexts, Extensions,
+Applications and Menus.
+
+The examples show the interaction between "Builder" classes that consume parser
+events and build PHP data structures from them.
 
 License information: All code here is licensed under the BSD license.
 
