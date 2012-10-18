@@ -4,7 +4,7 @@
 
 /**
  * This is the base class for a stateful filter that collects events and either
- * drops them, passes them on the the registered observers or stores them in a
+ * drops them, passes them on to the registered observers or stores them in a
  * queue that is dropped or flushed.
  *
  * @author gbirke
