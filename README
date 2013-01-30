@@ -4,8 +4,8 @@ The parser reads the dial plan file and produces events for each dialplan
 This is similar to the SAX event model of XML parsing.
 
 This library also contains "Builder" classes that consume the parser events
-and some classes that represent dial plan objects: Contexts, Extensions,
-Applications and Menus. This could be seen as Suimilar to a DOM XML parser 
+and classes that represent dial plan objects: Contexts, Extensions,
+Applications and Menus. This could be seen as similar to a DOM XML parser 
 which returns a finished data structure.
 
 The examples show the interaction between "Builder" classes that consume parser
